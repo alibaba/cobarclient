@@ -1184,7 +1184,7 @@ public class CobarSqlMapClientTemplate extends SqlMapClientTemplate implements D
                 return t;
             }
         };
-        BlockingQueue<Runnable> queueToUse = new LinkedBlockingQueue<Runnable>();
+        BlockingQueue<Runnable> queueToUse = new LinkedBlockingQueue<Runnable>(coreSize);
         final ThreadPoolExecutor executor = new ThreadPoolExecutor(coreSize, poolSize, 60,
                 TimeUnit.SECONDS, queueToUse, tf, new ThreadPoolExecutor.CallerRunsPolicy());
 
