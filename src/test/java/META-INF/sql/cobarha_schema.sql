@@ -1,0 +1,3 @@
+CREATE MEMORY TABLE IF NOT EXISTS cobarha(
+	timeflag TIMESTAMP
+);

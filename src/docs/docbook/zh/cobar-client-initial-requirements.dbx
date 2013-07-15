@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="roma_application_redirect" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+<title>CobarClient最初需求</title>
+		<para>
+			CobarClient需要满足以下需求:
+			<orderedlist>
+				<listitem>
+					<para>
+						可以支持垂直和水平数据切分数据库集群的访问;
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						支持双机热备的HA解决方案, 应用方可以根据情况选用数据库特定的HA解决方案(比如Oracle的RAC),或者选用CobarClient提供的HA解决方案.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						小数据量的数据集计(Aggregation), 暂时只支持简单的数据合并.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						数据库本地事务的支持, 目前采用Best Efforts 1PC模式的事务管理.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						数据访问操作相关SQL的记录, 分析等.(可以采用国际站现有Ark解决方案,但CobarClient提供扩展的切入接口)
+					</para>
+				</listitem>
+			</orderedlist>
+		</para>
+</chapter>

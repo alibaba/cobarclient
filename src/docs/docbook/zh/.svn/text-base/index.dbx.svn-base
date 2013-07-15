@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<book version="5.0" xml:id="roma-step-by-step" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+	<info>
+		<title>Cobar Client 文档全集</title>
+		<authorgroup>
+			<author>
+				<personname>王福强(darren.wangfq@alibaba-inc.com)</personname>
+			</author>
+		</authorgroup>
+
+		<abstract>
+			<para>
+				该文档描述了CobarClient产品的方方面面...
+			</para>
+		</abstract>
+
+		<keywordset>
+			<keyword>Cobar Client</keyword>
+			<keyword>分布式数据访问层</keyword>
+			<keyword>Spring, IBatis</keyword>
+		</keywordset>
+
+	</info>
+
+	<part>
+		<title>向Cobar Client迁移</title>
+		<xi:include href="cobar-client-migration-guide.dbx" />
+	</part>
+	<part>
+		<title>Cobar Client百科大全</title>
+		<xi:include href="cobar-client-background.dbx" />
+		<xi:include href="cobar-client-initial-requirements.dbx" />
+		<xi:include href="cobar-client-strategies-leverage.dbx" />
+		<xi:include href="cobar-client-reference.dbx" />
+		<xi:include href="cobar-client-in-future.dbx" />
+	</part>
+</book>

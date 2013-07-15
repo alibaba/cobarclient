@@ -1,0 +1,44 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="CobarTestSuite-Sequencial-Execution-Tests" verbose="2">
+	<test name="CobarSqlMapClientTemplateWithComposedRuleRouterTest">
+		<classes>
+			<class name="com.alibaba.cobar.client.CobarSqlMapClientDaoSupportTestWithComposedRuleRouter"></class>
+		</classes>
+	</test>
+	<test name="CobarSqlMapClientTemplateWithNamespaceRouterTest">
+		<classes>
+			<class name="com.alibaba.cobar.client.CobarSqlMapClientTemplateWithNamespaceRouterTest"></class>
+		</classes>
+	</test>
+	<test name="CobarSqlMapClientTemplateWithNamespaceShardingRouterTest">
+		<classes>
+			<class name="com.alibaba.cobar.client.CobarSqlMapClientTemplateWithNamespaceShardingRouterTest"></class>
+		</classes>
+	</test>
+	<test name="obarSqlMapClientTemplateWithSqlActionOnlyRouterTest">
+		<classes>
+			<class name="com.alibaba.cobar.client.CobarSqlMapClientTemplateWithSqlActionOnlyRouterTest"></class>
+		</classes>
+	</test>
+	<test name="obarSqlMapClientTemplateWithSqlActionShardingRouterTest">
+		<classes>
+			<class name="com.alibaba.cobar.client.CobarSqlMapClientTemplateWithSqlActionShardingRouterTest"></class>
+		</classes>
+	</test>
+	<test name="MultipleDataSourcesTransactionManagerTest">
+		<classes>
+			<class name="com.alibaba.cobar.client.transaction.MultipleDataSourcesTransactionManagerTest"></class>
+		</classes>
+	</test>
+	<test name="CobarSqlMapClientTemplateWithCustomMergerTest">
+		<classes>
+			<class name="com.alibaba.cobar.client.CobarSqlMapClientTemplateWithCustomMergerTest"></class>
+		</classes>
+	</test>
+	<test name="CobarSqlMapClientDaoSupportTestWithComposedRuleRouter">
+		<classes>
+			<class name="com.alibaba.cobar.client.CobarSqlMapClientDaoSupportTestWithComposedRuleRouter"></class>
+		</classes>
+	</test>
+</suite>

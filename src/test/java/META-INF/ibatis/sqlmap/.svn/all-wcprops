@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/ibatis/sqlmap
+END
+offers.xml
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/ibatis/sqlmap/offers.xml
+END
+tweets.xml
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/ibatis/sqlmap/tweets.xml
+END
+followers.xml
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/ibatis/sqlmap/followers.xml
+END

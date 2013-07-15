@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="roma_application_redirect" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+	<title>CobarClient Possible RoadMaps In The Future</title>
+	<para>
+		We hope CobarClient can provide an abstraction layer to hide the
+		complexity of distributed data access, also minimize the efforts to
+		access
+		multiple different data storage services.
+	</para>
+	<para>
+		We also hope to provide a consistent data access layer which can
+		standardize the data access behaviors of the applications,
+		and as the
+		requirements and architecture evolve, more functionalities can be
+		introduced into this layer, including data replication and
+		synchronization, data caching, real-time index building, etc. With
+		this CobarClient, the applications only need to know the concerns they
+		are real care about, rather to care about what changes, how much
+		changes, the left things can leave to CobarClient to take care of.
+	</para>
+</chapter>

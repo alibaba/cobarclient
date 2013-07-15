@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="GB2312"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="com.alibaba.cobar.client.entities.Tweet">
+
+	<typeAlias alias="tweet" type="com.alibaba.cobar.client.entities.Tweet" />
+
+	<resultMap id="tweet" class="tweet">
+		<result property="id"     column="id" />
+		<result property="tweet"   column="tweet" />
+	</resultMap>
+
+	<insert id="create">
+		insert into tweets(tweet) values(#tweet#)
+	</insert>
+	
+	<update id="update">
+		update tweets set tweet=#tweet# where id=#id#
+	</update>
+	
+	<select id="load" resultMap="tweet">
+		select * from tweets where id=#value#
+	</select>
+	
+	<select id="findAll" resultMap="tweet">
+		select * from tweets
+	</select>
+	
+	<select id="findByTweet" resultMap="tweet">
+		select * from tweets where tweet=#value#
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="roma_application_redirect" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+	<title>Initial Requirements of CobarClient</title>
+	<para>
+		CobarClient must support following functionalities:
+		<orderedlist>
+			<listitem>
+				<para>
+					data access support with horizontal or vertical partitions.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					support 2-master active HA deployment infrustructure, of
+					course, the applications still can choose other HA solutions, like
+					the ones specific to destination databases(e.g. RAC of Oracle).
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					Data aggregation support, currently only simple data merge
+					functionality is
+					available.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					Local database transaction support(Currently, such requirement is
+					fulfilled by using
+					<quote>Best Efforts 1PC Pattern</quote>
+					).
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					SQL auditing, analysis, etc.
+					<footnote>
+						<para>
+							ICBU Internal can use their old
+							<quote>Ark</quote>
+							solution to do such works, but CobarClient still provides
+							extension point for this.
+						</para>
+					</footnote>
+				</para>
+			</listitem>
+		</orderedlist>
+	</para>
+</chapter>

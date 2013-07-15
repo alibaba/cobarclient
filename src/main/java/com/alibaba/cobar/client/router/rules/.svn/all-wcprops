@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/cobarclient/!svn/ver/11/trunk/cobar-client/src/main/java/com/alibaba/cobar/client/router/rules
+END
+IRoutingRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/cobarclient/!svn/ver/11/trunk/cobar-client/src/main/java/com/alibaba/cobar/client/router/rules/IRoutingRule.java
+END
+AbstractEntityTypeRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/cobarclient/!svn/ver/11/trunk/cobar-client/src/main/java/com/alibaba/cobar/client/router/rules/AbstractEntityTypeRule.java
+END
+AbstractEntityAttributeRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 132
+/svn/cobarclient/!svn/ver/11/trunk/cobar-client/src/main/java/com/alibaba/cobar/client/router/rules/AbstractEntityAttributeRule.java
+END

@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="CobarTestSuite" verbose="2">
+	<test name="IndependentTests" parallel="tests">
+		<classes>
+			<class name="com.alibaba.cobar.client.router.config.CobarInternalRouterXmlFactoryBeanTest" />
+			<class name="com.alibaba.cobar.client.router.rules.IBatisNamespaceRuleTest" />
+			<class name="com.alibaba.cobar.client.router.rules.IBatisNamespaceShardingRuleTest" />
+			<class name="com.alibaba.cobar.client.router.rules.IBatisSqlActionRuleTest" />
+			<class name="com.alibaba.cobar.client.router.rules.IBatisSqlActionShardingRuleTest" />
+			<class name="com.alibaba.cobar.client.merger.ConcurrentSortMergerTest"></class>
+		</classes>
+	</test>
+</suite>

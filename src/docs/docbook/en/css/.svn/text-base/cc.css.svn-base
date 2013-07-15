@@ -1,0 +1,28 @@
+body {
+    margin-top:     1em;
+    margin-bottom:  1em;
+    margin-left:    10%;
+    margin-right:   10%;
+    font-size:   12pt;
+	font-family: arial, sans-serif;
+}
+
+pre.programlisting {
+    font-size:      9pt;
+    padding:        5pt 2pt;
+    border:         1pt solid black;
+    background:     #eeeeee;
+}
+
+div.note, div.important, div.example, div.informalexample, div.tip, div.warning, div.caution {
+    margin:         1em;
+    padding:        0.5em;
+    border:         1px solid gray;
+    background-color: #f8f8e0;
+}
+
+div.important th, div.note th, div.tip th {
+    text-align:     left;
+    border-bottom:  solid 1px gray;
+    font-size: 12px;
+}

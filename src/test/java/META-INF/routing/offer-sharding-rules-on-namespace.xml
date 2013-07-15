@@ -1,0 +1,12 @@
+<rules>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Offer</namespace>
+    <shardingExpression><![CDATA[mod.apply(memberId)==1]]></shardingExpression>
+    <shards>partition1</shards>
+  </rule>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Offer</namespace>
+    <shardingExpression><![CDATA[mod.apply(memberId)==2]]></shardingExpression>
+    <shards>partition2</shards>
+  </rule>
+</rules>

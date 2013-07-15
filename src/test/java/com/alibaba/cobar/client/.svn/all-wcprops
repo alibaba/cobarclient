@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client
+END
+CobarSqlMapClientDaoSupportTestWithComposedRuleRouter.java
+K 25
+svn:wc:ra_dav:version-url
+V 144
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client/CobarSqlMapClientDaoSupportTestWithComposedRuleRouter.java
+END
+CobarSqlMapClientTemplateWithCustomMergerTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 136
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client/CobarSqlMapClientTemplateWithCustomMergerTest.java
+END
+CobarTestNGTestsRunner.java
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client/CobarTestNGTestsRunner.java
+END
+CobarSqlMapClientTemplateWithNamespaceRouterTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 139
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client/CobarSqlMapClientTemplateWithNamespaceRouterTest.java
+END
+CobarSqlMapClientTemplateWithNamespaceShardingRouterTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 147
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client/CobarSqlMapClientTemplateWithNamespaceShardingRouterTest.java
+END
+CobarSqlMapClientTemplateWithSqlActionShardingRouterTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 147
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client/CobarSqlMapClientTemplateWithSqlActionShardingRouterTest.java
+END
+CobarSqlMapClientTemplateWithSqlActionOnlyRouterTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 143
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client/CobarSqlMapClientTemplateWithSqlActionOnlyRouterTest.java
+END
+AbstractTestNGCobarClientTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client/AbstractTestNGCobarClientTest.java
+END
+CobarSqlMapClientTemplateWithComposedRuleRouterTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 142
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client/CobarSqlMapClientTemplateWithComposedRuleRouterTest.java
+END

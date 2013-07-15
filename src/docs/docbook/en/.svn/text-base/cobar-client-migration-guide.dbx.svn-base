@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="roma_application_redirect" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+	<title>Cobar Client Migration Guide</title>
+	<para>
+		Cobar Client is mainly for the applications who is using iBatis
+		as the data access layer. If you have used Spring's
+		SqlMapClientTemplate with iBatis and you also want to achieve
+		distributed
+		data access abilities, then Cobar Client is for you.
+		Furthermore, it will be much easier to migrate your
+		application(s) to
+		use Cobar Client to do data access stuffs. Here is how to.
+	</para>
+	<para>
+		Suppose your applications are now depending on Spring's
+		SqlMapClientTemplate to do data access stuffs, to migrate to Cobar
+		Client, What you need to do is just to change from Spring's
+		SqlMapClientTemplate to Cobar Client's CobarSqlMapClientTemplate.
+		Meantime, to sync up transaction management, the original
+		DataSourceTransactionManager of spring framework has to be change to
+		MultipleDataSourcesTransactionManager of Cobar Client.
+		The
+		configuration changes is listed below with 2 snippets in contrast with
+		each other:
+		<programlisting language="xml"><![CDATA[
+Before using CobarClient:
+
+<bean id="sqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+	<property name="sqlMapClient" ref="sqlMapClient"/>
+	...
+</bean>
+
+<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	<property name="dataSource" ref="dataSource"/>
+	...
+</bean>
+
+<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+	<property name="dataSource" ref="dataSource" />
+	<property name="configLocation" value="classpath:META-INF/ibatis/sqlmap-config.xml" />
+</bean>
+
+<bean id="dataSource" ...>
+	...
+</bean>
+		]]></programlisting>
+		<programlisting language="xml"><![CDATA[
+After using CobarClient:
+
+<bean id="sqlMapClientTemplate" class="com.alibaba.cobar.client.CobarSqlMapClientTemplate">
+	<property name="sqlMapClient" ref="sqlMapClient"/>
+	...
+</bean>
+
+<bean id="transactionManager" class="com.alibaba.cobar.client.transaction.MultipleDataSourcesTransactionManager">
+	...
+</bean>
+
+<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+	<property name="dataSource" ref="dataSource" />
+	<property name="configLocation" value="classpath:META-INF/ibatis/sqlmap-config.xml" />
+</bean>
+
+<bean id="dataSource" ...>
+	...
+</bean>
+		]]></programlisting>
+		As you can see, only 2 placements in the configuration need to be
+		changed to complete the whole migration.
+	</para>
+	<para>
+		OK, I lied,
+		the above sample is a scenario that has been
+		simplified, in fact, to
+		complete the whole migration, there are more
+		details we need to take
+		care of.
+	</para>
+	<sect1>
+		<title>
+			Explanation on Multiple Data Sources Management
+			Under Database
+			Shards
+		</title>
+		<para>
+			In the situation of single data source, SqlMapClientTemplate(or the
+			SqlMapClient it depends) and DataSourceTransactionManager it will
+			used to manage transaction both will refer to a single same data
+			source. But when the data has been splitted into different
+			partitions/shards, the applications maybe have to access multiple
+			data sources to complete single data acess request. To manage these
+			multiple data sources as dependencies in a consistent and easy way,
+			CobarClient provides
+			<quote>ICobarDataSourceService</quote>
+			as the top abstraction on this concern.
+			<quote>ICobarDataSourceService</quote>
+			will manage multiple data sources that will be used by both
+			<quote>com.alibaba.cobar.client.CobarSqlMapClientTemplate</quote>
+			and
+			<quote>com.alibaba.cobar.client.transaction.MultipleDataSourcesTransactionManager
+			</quote>
+			.
+			<quote>com.alibaba.cobar.client.CobarSqlMapClientTemplate</quote>
+			and
+			<quote>com.alibaba.cobar.client.transaction.MultipleDataSourcesTransactionManager
+			</quote>
+			will now depend on some implementation of
+			<quote>ICobarDataSourceService</quote>
+			to provide data sources dependency.
+			So, now the original configuration
+			will become to:
+			<programlisting language="xml"><![CDATA[
+<bean id="dataSources" class="Some ICobarDataSourceService Implementation Class">
+	...
+</bean>
+
+<bean id="transactionManager"
+	class="com.alibaba.cobar.client.transaction.MultipleDataSourcesTransactionManager">
+	<property name="cobarDataSourceService" ref="dataSources" />
+</bean>
+
+<bean id="sqlMapClientTemplate" class="com.alibaba.cobar.client.CobarSqlMapClientTemplate">
+	<property name="sqlMapClient" ref="sqlMapClient" />
+	<property name="cobarDataSourceService" ref="dataSources" />
+	...
+</bean>
+
+<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+	<property name="dataSource" ref="dataSource" />
+	<property name="configLocation" value="classpath:META-INF/ibatis/sqlmap-config.xml" />
+</bean>
+		]]></programlisting>
+			That's, both
+			<quote>MultipleDataSourcesTransactionManager</quote>
+			and
+			<quote>CobarSqlMapClientTemplate</quote>
+			will have a same
+			<emphasis>cobarDataSourceService</emphasis>
+			dependency which is the bean definition named
+			<emphasis>dataSources</emphasis>
+			in our configuration snippet above. The bean definition will define a
+			bean who is an implementation of
+			<quote>ICobarDataSourceService</quote>
+			. For now, we provide a default implementation -
+			<quote>com.alibaba.cobar.client.datasources.DefaultCobarDataSourceService
+			</quote>
+			. Here follows a sample configuration snippet we may use:
+			<programlisting language="xml"><![CDATA[
+<bean id="dataSources" class="com.alibaba.cobar.client.datasources.DefaultCobarDataSourceService">
+	<property name="dataSourceDescriptors">
+		<set>
+			<bean class="com.alibaba.cobar.client.datasources.CobarDataSourceDescriptor">
+				<property name="identity" value="partition1"/>
+				<property name="targetDataSource" ref="partition1_main"/>
+				<property name="targetDetectorDataSource" ref="partition1_main"/>
+				<property name="standbyDataSource" ref="partition1_standby"/>
+				<property name="standbyDetectorDataSource" ref="partition1_standby"/>
+			</bean>
+			<bean class="com.alibaba.cobar.client.datasources.CobarDataSourceDescriptor">
+				<property name="identity" value="partition2"/>
+				<property name="targetDataSource" ref="partition2_main"/>
+				<property name="targetDetectorDataSource" ref="partition2_main"/>
+				<property name="standbyDataSource" ref="partition2_standby"/>
+				<property name="standbyDetectorDataSource" ref="partition2_standby"/>
+			</bean>
+		</set>
+	</property>
+	<property name="haDataSourceCreator">
+		<bean class="com.alibaba.cobar.client.datasources.ha.FailoverHotSwapDataSourceCreator">
+			<property name="detectingSql" value="update cobarha set timeflag=CURRENT_TIMESTAMP()"/>
+		</bean>
+	</property>
+</bean>
+
+<bean id="partition1_main" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+	<property name="driverClass" value="org.h2.Driver" />
+	<property name="jdbcUrl" value="jdbc:h2:mem:p1_main;DB_CLOSE_DELAY=-1;MODE=MySQL;LOCK_MODE=3" />
+	<property name="user" value="" />
+	<property name="password" value="" />
+	<property name="minPoolSize" value="10" />
+	<property name="maxPoolSize" value="20" />
+	<property name="maxIdleTime" value="1800" />
+	<property name="acquireIncrement" value="2" />
+	<property name="maxStatements" value="0" />
+	<property name="initialPoolSize" value="2" />
+	<property name="idleConnectionTestPeriod" value="1800" />
+	<property name="acquireRetryAttempts" value="30" />
+	<property name="breakAfterAcquireFailure" value="true" />
+	<property name="testConnectionOnCheckout" value="false" />
+</bean>
+
+<bean id="partition1_standby" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+	<property name="driverClass" value="org.h2.Driver" />
+	<property name="jdbcUrl" value="jdbc:h2:mem:p1_standby;DB_CLOSE_DELAY=-1;MODE=MySQL;LOCK_MODE=3" />
+	<property name="user" value="" />
+	<property name="password" value="" />
+	<property name="minPoolSize" value="10" />
+	<property name="maxPoolSize" value="20" />
+	<property name="maxIdleTime" value="1800" />
+	<property name="acquireIncrement" value="2" />
+	<property name="maxStatements" value="0" />
+	<property name="initialPoolSize" value="2" />
+	<property name="idleConnectionTestPeriod" value="1800" />
+	<property name="acquireRetryAttempts" value="30" />
+	<property name="breakAfterAcquireFailure" value="true" />
+	<property name="testConnectionOnCheckout" value="false" />
+</bean>
+
+<bean id="partition2_main" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+	<property name="driverClass" value="org.h2.Driver" />
+	<property name="jdbcUrl" value="jdbc:h2:mem:p2_main;DB_CLOSE_DELAY=-1;MODE=MySQL;LOCK_MODE=3" />
+	<property name="user" value="" />
+	<property name="password" value="" />
+	<property name="minPoolSize" value="10" />
+	<property name="maxPoolSize" value="20" />
+	<property name="maxIdleTime" value="1800" />
+	<property name="acquireIncrement" value="2" />
+	<property name="maxStatements" value="0" />
+	<property name="initialPoolSize" value="2" />
+	<property name="idleConnectionTestPeriod" value="1800" />
+	<property name="acquireRetryAttempts" value="30" />
+	<property name="breakAfterAcquireFailure" value="true" />
+	<property name="testConnectionOnCheckout" value="false" />
+</bean>
+
+<bean id="partition2_standby" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+	<property name="driverClass" value="org.h2.Driver" />
+	<property name="jdbcUrl" value="jdbc:h2:mem:p2_standby;DB_CLOSE_DELAY=-1;MODE=MySQL;LOCK_MODE=3" />
+	<property name="user" value="" />
+	<property name="password" value="" />
+	<property name="minPoolSize" value="10" />
+	<property name="maxPoolSize" value="20" />
+	<property name="maxIdleTime" value="1800" />
+	<property name="acquireIncrement" value="2" />
+	<property name="maxStatements" value="0" />
+	<property name="initialPoolSize" value="2" />
+	<property name="idleConnectionTestPeriod" value="1800" />
+	<property name="acquireRetryAttempts" value="30" />
+	<property name="breakAfterAcquireFailure" value="true" />
+	<property name="testConnectionOnCheckout" value="false" />
+</bean>
+		]]></programlisting>
+			DefaultCobarDataSourceService has a group of
+			com.alibaba.cobar.client.datasources.CobarDataSourceDescriptor
+			references, and each
+			<quote>com.alibaba.cobar.client.datasources.CobarDataSourceDescriptor
+			</quote>
+			depicts the necessary dependencies of each data partition/shard.
+			These necessary dependencies are:
+			<itemizedlist>
+				<listitem>
+					<formalpara>
+						<title>identity</title>
+						<para>
+							The identity of data partition/shard, it should not collide
+							with others'. When defining routing rules, the identity will be
+							used as part of the rules.
+						</para>
+					</formalpara>
+				</listitem>
+				<listitem>
+					<formalpara>
+						<title>targetDataSource</title>
+						<para>
+							the main target data source reference, in general, when the
+							application is launched, this data source must be active.
+						</para>
+					</formalpara>
+				</listitem>
+				<listitem>
+					<formalpara>
+						<title>targetDetectorDataSource</title>
+						<para>
+							paired with main target data source, this data source
+							reference is used to detect the status of the main target data
+							source so that HA operations can be performed at right timing.
+							This data source must be configured independently so that it will
+							not interfere with the others.
+						</para>
+					</formalpara>
+				</listitem>
+				<listitem>
+					<formalpara>
+						<title>standbyDataSource</title>
+						<para>
+							When HA functionality is enabled and the main target data
+							source is down, CobarClient will switch to
+							use this data source
+							instead of main target data source.
+						</para>
+					</formalpara>
+				</listitem>
+				<listitem>
+					<formalpara>
+						<title>standbyDetectorDataSource</title>
+						<para>
+							detetor data source for standby target data source. It should be
+							configured independently too, just like
+							<quote>targetDetectorDataSource</quote>
+							.
+						</para>
+					</formalpara>
+				</listitem>
+			</itemizedlist>
+			<note>
+				<para>
+					Since the data sources are retrieved via JNDi when Cobar
+					Client was launched, so we have to set up another paired data
+					source to use for detecting target database status.
+					The reason is We
+					can't get the
+					exact configuration information of the data source
+					bound to JNDI,
+					so we can't create a paired data source for detecting
+					database
+					status by ourselves. If we do, we can create paired data
+					sources by ourselves as per single piece of configuration
+					information.
+				</para>
+			</note>
+			Currently, CobarDataSourceDescriptor only contains necessary
+			information for specific database deployment structure, that's, 2
+			Master Active Database deployment structure. Later on, as requirement
+			changes, it may be adapted to meet the needs of different scenarios.
+			<tip>
+				<para>
+					If 2 master active HA functionality is not needed, then we can
+					point
+					<quote>standby(.*)DataSource</quote>
+					to
+					<quote>target(.*)DataSource</quote>
+					, or just ignore configuring the
+					<quote>haDataSourceCreator</quote>
+					attribute of DefaultCobarDataSourceService,then it's not necessary
+					to configure
+					<quote>standbyDataSource</quote>
+					,
+					<quote>standbyDetectorDataSource</quote>
+					and
+					<quote>targetDetectorDataSource</quote>
+					attributes.
+				</para>
+				<para>
+					CobarDataSourceDescriptor can refer to diffrent data sources,
+					like
+					the ones from JNDI, or the ones that are in local
+					containers(e.g.
+					for test purpose, we use C3P0 implementation in
+					spring ioc
+					container.), even other types of data sources, as long as they
+					conform to standard JDBC
+					<quote>DataSource</quote>
+					API.
+				</para>
+			</tip>
+		</para>
+		<para>
+			DefaultCobarDataSourceService not only depends on a group of
+			CobarDataSourceDescriptor, but also depends on an
+			<quote>IHADataSourceCreator</quote>
+			to supoort HA functionality. If no
+			<quote>IHADataSourceCreator</quote>
+			implementation is given, DefaultCobarDataSourceService will use
+			<quote>NonHADataSourceCreator</quote>
+			as default, that's, not create HA-enabled data sources. If HA is
+			needed, FailoverHotSwapDataSourceCreator of CobarClient is available,
+			of course, if needed, the application can implement their own
+			IHADataSourceCreator implementations.
+		</para>
+		<para>
+			The concern on how to manage multiple data sources of different
+			database partitions/shards is done here, next, let check out other
+			configuration details...
+		</para>
+	</sect1>
+	<sect1>
+		<title>Explanation On Other Configurations Of
+			CobarSqlMapClientTemplate</title>
+		<para>
+			com.alibaba.cobar.client.transaction.MultipleDataSourcesTransactionManager
+			is a standard extension of PlatformTransactionManager in spring
+			framework, so except for
+			<quote>ICobarDataSourceService</quote>
+			dependency which is speicific to CobarClient, all of the other things
+			are inherited from
+			spring
+			<quote>AbstractPlatformTransactionManager</quote>
+			, so we will not explain too much on it, the users can refere to
+			spring documentation for details and further help. In this section,
+			we mainly explain more on CobarSqlMapClientTemplate's other
+			dependencies.
+		</para>
+		<sect2>
+			<title>Configuration On Data Access Routing</title>
+			<para>
+				CobarSqlMapClientTemplate depends on some
+				<quote>ICobarDataSourceService</quote>
+				implementation to get information of different data
+				partitions/shards,
+				furthermore, in order to know where to route the
+				data access requests, it also
+				depends on an
+				<quote>ICobarRouter</quote>
+				implementation to help on data access routing.
+				So with an
+				<quote>ICobarRouter</quote>
+				implementation available, we get a well-configured
+				CobarSqlMapClientTemplate below:
+				<programlisting language="xml"><![CDATA[
+<bean id="sqlMapClientTemplate" class="com.alibaba.cobar.client.CobarSqlMapClientTemplate">
+	<property name="sqlMapClient" ref="sqlMapClient" />
+	<property name="cobarDataSourceService" ref="dataSources" />
+	<property name="router" ref="internalRouter" />
+	<property name="sqlAuditor">
+		<bean class="com.alibaba.cobar.client.audit.SimpleSqlAuditor" />
+	</property>
+	<property name="profileLongTimeRunningSql" value="true" />
+	<property name="longTimeRunningSqlIntervalThreshold" value="3600000" />
+</bean>
+
+<bean id="internalRouter"
+	class="com.alibaba.cobar.client.router.config.CobarInteralRouterXmlFactoryBean">
+	<property name="functionsMap">
+		<map>
+			<entry key="mod">
+				<bean class="com.alibaba.cobar.client.router.rules.support.ModFunction">
+					<constructor-arg><value>128</value></constructor-arg>
+				</bean>
+			</entry>
+		</map>
+	</property>
+	<property name="configLocations">
+		<list>
+			<value>classpath:META-INF/routing/offer-sql-action-rules.xml</value>
+			<value>classpath:META-INF/routing/offer-sharding-rules-on-namespace.xml</value>
+		</list>
+	</property>
+</bean>
+				]]></programlisting>
+				<note>
+					<para>
+						As to configuration items like
+						<quote>sqlAuditor</quote>
+						,
+						<quote>profileLongTimeRunningSql</quote>
+						,
+						or
+						<quote>longTimeRunningSqlIntervalThreshold</quote>
+						, they are optional, more details can be found in CobarClient
+						Reference.
+					</para>
+				</note>
+				Default Implementation of ICobarRouter is
+				<emphasis>com.alibaba.cobar.client.router.CobarClientInternalRouter
+				</emphasis>
+				, in order to simplify configuration things, A FactoryBean is also
+				provided, that's,
+				com.alibaba.cobar.client.router.config.CobarInteralRouterXmlFactoryBean.
+				The main configuration item of it is
+				<quote>configLocations</quote>
+				(or configLocation, if only one routing rule file is available)
+				which specify the locations of routing rule files,
+				com.alibaba.cobar.client.router.CobarClientInternalRouter will use
+				the rules in these files to decide on deata access routing.
+				Here is a
+				sample routing rule file:
+				<programlisting language="xml"><![CDATA[
+<rules>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Offer</namespace>
+    <shardingExpression>mod.apply(memberId)==1</shardingExpression>
+    <shards>partition1</shards>
+  </rule>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Offer</namespace>
+    <shardingExpression>mod.apply(memberId)==2</shardingExpression>
+    <shards>partition2</shards>
+  </rule>
+</rules>
+				]]></programlisting>
+				In the
+				<quote>shardingExpression</quote>
+				of the routing rule, a custom function is used(mod.apply(..)), this
+				custom function is defined by ourselves,
+				After it is defined, we can
+				pass it in via
+				<quote>functionsMap</quote>
+				attribute of
+				com.alibaba.cobar.client.router.config.CobarInteralRouterXmlFactoryBean,
+				then we can use it in the routing rule expressions.
+			</para>
+			<para>
+				The routing rules definition is very simple, so it's not necessary
+				to make it mandatory to use DTD or XML Schema. But if you indeed
+				want it, a smiple description on DTD of routing rules is listed
+				below:
+				<programlisting><![CDATA[
+<?xml version="1.0"?  encoding="UTF-8"?>
+<!ELEMENT rules (rule)+>
+<!ELEMENT rule ((namespace|sqlmap),shardingExpression,shards)>
+<!ELEMENT namespace (#PCDATA)>
+<!ELEMENT sqlmap (#PCDATA)>
+<!ELEMENT shardingExpression (#PCDATA)>
+<!ELEMENT shards (#PCDATA)>
+				]]></programlisting>
+				Routing Rules can be classified into 4 types, you can find more
+				details in CobarClient Reference. Anyway, with routing rule
+				definitions above, distributed data access can be achieved by using
+				CobarClient.
+			</para>
+		</sect2>
+		<sect2>
+			<title>What's Next?</title>
+			<para>
+				This migration guide only provide simple explanations on basic
+				things of CobarClient, more details can be found in CobarClient
+				Reference, including how to define a routing
+				rule, how to
+				configure
+				the HA support,etc.
+			</para>
+		</sect2>
+	</sect1>
+
+</chapter>

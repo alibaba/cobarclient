@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN" "http://www.ibatis.com/dtd/sql-map-config-2.dtd">
+<sqlMapConfig>
+	<settings cacheModelsEnabled="true" enhancementEnabled="true"
+		lazyLoadingEnabled="false" maxRequests="3000" maxSessions="3000"
+		maxTransactions="3000" useStatementNamespaces="true" />
+		<sqlMap resource="META-INF/ibatis/sqlmap/tweets.xml" />
+		<sqlMap resource="META-INF/ibatis/sqlmap/followers.xml" />
+		<sqlMap resource="META-INF/ibatis/sqlmap/offers.xml" />
+</sqlMapConfig>

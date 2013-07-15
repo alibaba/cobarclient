@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:lang="http://www.springframework.org/schema/lang"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd
+		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+	<bean id="partition1_main" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="org.h2.Driver" />
+		<property name="jdbcUrl" value="jdbc:h2:mem:p1_main;DB_CLOSE_DELAY=-1;MODE=MySQL;LOCK_MODE=3" />
+		<property name="user" value="" />
+		<property name="password" value="" />
+		<property name="minPoolSize" value="10" />
+		<property name="maxPoolSize" value="20" />
+		<property name="maxIdleTime" value="1800" />
+		<property name="acquireIncrement" value="2" />
+		<property name="maxStatements" value="0" />
+		<property name="initialPoolSize" value="2" />
+		<property name="idleConnectionTestPeriod" value="1800" />
+		<property name="acquireRetryAttempts" value="30" />
+		<property name="breakAfterAcquireFailure" value="true" />
+		<property name="testConnectionOnCheckout" value="false" />
+	</bean>
+	
+	<bean id="partition1_standby" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="org.h2.Driver" />
+		<property name="jdbcUrl" value="jdbc:h2:mem:p1_standby;DB_CLOSE_DELAY=-1;MODE=MySQL;LOCK_MODE=3" />
+		<property name="user" value="" />
+		<property name="password" value="" />
+		<property name="minPoolSize" value="10" />
+		<property name="maxPoolSize" value="20" />
+		<property name="maxIdleTime" value="1800" />
+		<property name="acquireIncrement" value="2" />
+		<property name="maxStatements" value="0" />
+		<property name="initialPoolSize" value="2" />
+		<property name="idleConnectionTestPeriod" value="1800" />
+		<property name="acquireRetryAttempts" value="30" />
+		<property name="breakAfterAcquireFailure" value="true" />
+		<property name="testConnectionOnCheckout" value="false" />
+	</bean>
+	
+	<bean id="partition2_main" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="org.h2.Driver" />
+		<property name="jdbcUrl" value="jdbc:h2:mem:p2_main;DB_CLOSE_DELAY=-1;MODE=MySQL;LOCK_MODE=3" />
+		<property name="user" value="" />
+		<property name="password" value="" />
+		<property name="minPoolSize" value="10" />
+		<property name="maxPoolSize" value="20" />
+		<property name="maxIdleTime" value="1800" />
+		<property name="acquireIncrement" value="2" />
+		<property name="maxStatements" value="0" />
+		<property name="initialPoolSize" value="2" />
+		<property name="idleConnectionTestPeriod" value="1800" />
+		<property name="acquireRetryAttempts" value="30" />
+		<property name="breakAfterAcquireFailure" value="true" />
+		<property name="testConnectionOnCheckout" value="false" />
+	</bean>
+	
+	<bean id="partition2_standby" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="org.h2.Driver" />
+		<property name="jdbcUrl" value="jdbc:h2:mem:p2_standby;DB_CLOSE_DELAY=-1;MODE=MySQL;LOCK_MODE=3" />
+		<property name="user" value="" />
+		<property name="password" value="" />
+		<property name="minPoolSize" value="10" />
+		<property name="maxPoolSize" value="20" />
+		<property name="maxIdleTime" value="1800" />
+		<property name="acquireIncrement" value="2" />
+		<property name="maxStatements" value="0" />
+		<property name="initialPoolSize" value="2" />
+		<property name="idleConnectionTestPeriod" value="1800" />
+		<property name="acquireRetryAttempts" value="30" />
+		<property name="breakAfterAcquireFailure" value="true" />
+		<property name="testConnectionOnCheckout" value="false" />
+	</bean>
+	
+	<bean id="dataSources" class="com.alibaba.cobar.client.datasources.DefaultCobarDataSourceService">
+		<property name="dataSourceDescriptors">
+			<set>
+				<bean class="com.alibaba.cobar.client.datasources.CobarDataSourceDescriptor">
+					<property name="identity" value="partition1"/>
+					<property name="targetDataSource" ref="partition1_main"/>
+					<property name="targetDetectorDataSource" ref="partition1_main"/>
+					<property name="standbyDataSource" ref="partition1_standby"/>
+					<property name="standbyDetectorDataSource" ref="partition1_standby"/>
+					<property name="poolSize" value="10"/>
+				</bean>
+				<bean class="com.alibaba.cobar.client.datasources.CobarDataSourceDescriptor">
+					<property name="identity" value="partition2"/>
+					<property name="targetDataSource" ref="partition2_main"/>
+					<property name="targetDetectorDataSource" ref="partition2_main"/>
+					<property name="standbyDataSource" ref="partition2_standby"/>
+					<property name="standbyDetectorDataSource" ref="partition2_standby"/>
+				</bean>
+			</set>
+		</property>
+		<property name="haDataSourceCreator">
+			<bean class="com.alibaba.cobar.client.datasources.ha.FailoverHotSwapDataSourceCreator">
+				<property name="detectingSql" value="update cobarha set timeflag=CURRENT_TIMESTAMP()"/>
+			</bean>
+		</property>
+	</bean>
+	 
+</beans>

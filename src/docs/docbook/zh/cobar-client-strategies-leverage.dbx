@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="roma_application_redirect" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+<title>CobarClient方案之间的权衡</title>
+		<para>
+			CobarClient的实现方案可以从多个角度进行考虑, 我们暂且选择三种方案进行推演.
+		</para>
+		<sect1 id="jdbc solution" xreflabel="JDBC API层次的解决方案">
+			<title>JDBC API层次的解决方案</title>
+			<para>
+				因为现有的Cobar解决方案通过SQL解析来实现了shards间的路由功能, 所以, 自然而然的, 大家会马上联想到在JDBC Driver层次进行同样的封装,然后也是通过SQL解析的方式来实现路由功能. 
+				首先这种方案是可以实现的, 但工期也绝对不会像想象的那么短. 
+			</para>
+			<para>
+				要走这条路, 我们不可能通过封装或者拦截几个JDBC接口就很容易的搞定, 我们需要实现一整套的JDBC规范,这无论从开发还是测试方面考虑,投入的时间都会很多.
+			</para>
+			<para>
+				最初我们尝试只拦截Connection, Statement的相关方法来获取SQL并进行解析等工作,但发现相关方法调用的lifecycle的不匹配问题, 方法调用的trace问题, 数据库metadata等都会造成实现过程中的<quote>尴尬</quote>和难行.
+			</para>
+			<para>
+				但不管怎么样, 完全的实现一套JDBC规范的API,原则上来说可以实现类似于现有Cobar解决方案类似的方案.
+			</para>
+		</sect1>
+		<sect1 id="dal solution" xreflabel="DAL层次的解决方案">
+			<title>DAL层次的解决方案</title>
+			<para>
+				要实现数据方案的路由功能, 我们也可以在数据访问层做文章. 从DAL层做文章的好处在于, 我们可以规范开发流程, 简化路由功能的实现, 而且, 不管将来增加更多的shards或者其它异构的存储, 比如KV store, 
+				DAL层都可以屏蔽这些变化, 使得应用程序不受任何影响.
+			</para>
+			<para>
+				如果采用DAL层的解决方案, 我们可以将sharding策略和规则<quote>外部化</quote>, 通过统一的配置(Annotation也好, 外部XML之类配置文件也好)来定义路由规则, 路由规则可以根据DO的类型以及相关属性进行定义, 
+				定义简单又不失灵活性, 完全不用引入SQL解析之类的复杂性.
+			</para>
+			<para>
+				但基于DAL层次的解决方案对现有网站的应用来说, 冲击性太大,所以, 这虽然是个方向,但短期内无法有效施行.
+			</para>
+		</sect1>
+		<sect1>
+			<title>特定国际站场景的解决方案</title>
+			<para>
+				考虑到工期以及兼容性等因素, 我们可以考虑介于<xref linkend="jdbc solution"/>和<xref linkend="dal solution"/>之间的一种解决方案.
+			</para>
+			<para>
+				B2B内部数据访问全部采用iBatis进行, 为了提高开发效率,自然也采用了Spring提供的SqlMapClientTemplate进行数据访问逻辑的开发. 要较少的侵入现有应用,
+				我们可以考虑对SqlMapClientTemplate做手脚, 既然所有的数据访问都通过该类走,那么就在该类中插入路由逻辑, 根据数据访问请求的属性指定路由规则, 然后将符合路由规则的数据访问请求路由到相应的shard上去.
+			</para>
+			<para>
+				这实际上就是我们现在第一阶段采用的解决方案.
+			</para>
+		</sect1>
+</chapter>

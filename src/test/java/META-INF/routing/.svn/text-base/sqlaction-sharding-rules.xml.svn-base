@@ -1,0 +1,22 @@
+<rules>
+	<rule>
+		<sqlmap>com.alibaba.cobar.client.entities.Follower.create</sqlmap>
+		<shardingExpression><![CDATA[name.startsWith("A")]]></shardingExpression>
+		<shards>partition1</shards>
+	</rule>
+	<rule>
+		<sqlmap>com.alibaba.cobar.client.entities.Follower.create</sqlmap>
+		<shardingExpression><![CDATA[name.startsWith("D")]]></shardingExpression>
+		<shards>partition2</shards>
+	</rule>
+	<rule>
+		<sqlmap>com.alibaba.cobar.client.entities.Follower.batchInsert</sqlmap>
+		<shardingExpression><![CDATA[name.startsWith("A")]]></shardingExpression>
+		<shards>partition1</shards>
+	</rule>
+	<rule>
+		<sqlmap>com.alibaba.cobar.client.entities.Follower.batchInsert</sqlmap>
+		<shardingExpression><![CDATA[name.startsWith("D")]]></shardingExpression>
+		<shards>partition2</shards>
+	</rule>
+</rules>

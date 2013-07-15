@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:lang="http://www.springframework.org/schema/lang"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd
+		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+	<bean id="sqlMapClientTemplateWithMerger" class="com.alibaba.cobar.client.CobarSqlMapClientTemplate">
+		<property name="sqlMapClient" ref="sqlMapClient" />
+		<property name="cobarDataSourceService" ref="dataSources" />
+		<property name="router" ref="internalRouter" />
+		<property name="sqlAuditor">
+			<bean class="com.alibaba.cobar.client.audit.SimpleSqlAuditor" />
+		</property>
+		<property name="profileLongTimeRunningSql" value="true" />
+		<property name="longTimeRunningSqlIntervalThreshold" value="3600000" />
+		<property name="mergers">
+			<map>
+				<entry
+					key="com.alibaba.cobar.client.entities.Offer.findAllWithOrderByOnSubject"
+					value-ref="merger" />
+			</map>
+		</property>
+	</bean>
+
+	<bean id="merger" class="com.alibaba.cobar.client.merger.ConcurrentSortMerger">
+		<property name="comparator" ref="comparator">
+		</property>
+	</bean>
+
+	<bean id="comparator" class="com.alibaba.cobar.client.support.OfferComparator">
+	</bean>
+
+	<bean id="internalRouter"
+		class="com.alibaba.cobar.client.router.config.StaticCobarClientInternalRouterFactoryBean">
+		<property name="functionsMap">
+			<map>
+				<entry key="mod">
+					<bean class="com.alibaba.cobar.client.router.rules.support.ModFunction">
+						<constructor-arg>
+							<value>128</value>
+						</constructor-arg>
+					</bean>
+				</entry>
+			</map>
+		</property>
+		<property name="rules">
+			<list>
+				<bean class="com.alibaba.cobar.client.router.config.vo.InternalRule">
+					<property name="namespace" value="com.alibaba.cobar.client.entities.Offer" />
+					<property name="shardingExpression" value="mod.apply(memberId)==1" />
+					<property name="shards" value="partition1" />
+				</bean>
+				<bean class="com.alibaba.cobar.client.router.config.vo.InternalRule">
+					<property name="namespace" value="com.alibaba.cobar.client.entities.Offer" />
+					<property name="shardingExpression" value="mod.apply(memberId)==2" />
+					<property name="shards" value="partition2" />
+				</bean>
+				<bean class="com.alibaba.cobar.client.router.config.vo.InternalRule">
+					<property name="sqlmap"
+						value="com.alibaba.cobar.client.entities.Offer.findAllWithOrderByOnSubject" />
+					<property name="shards" value="partition1, partition2" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+</beans>

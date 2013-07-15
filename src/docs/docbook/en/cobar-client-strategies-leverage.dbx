@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="roma_application_redirect" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+	<title>
+		Possible Strategies for CobarClient Design and Development
+	</title>
+	<para>
+		The Design and Development of CobarClient can be done from
+		different aspects, but we choose three solutions for it for the time
+		being.
+	</para>
+	<sect1 id="jdbc solution" xreflabel="JDBC API Layer Solution">
+		<title>JDBC API Layer Solution</title>
+		<para>
+			The available
+			<quote>Cobar</quote>
+			project do data access routings by parsing and analyzing SQL, so most
+			of us will think it's easy to do almost same things by wrapping the
+			JDBC drivers. Of course, it should work, but it takes time, long
+			time.
+		</para>
+		<para>
+			To do things in this way, we can't just wrap or intercept
+			several JDBC interfaces to make it run, we need to implement the
+			whole JDBC specification, and it will take too much time on
+			development and testing. 
+		</para>
+		<para>
+			At first, we just try to intercept serveral methods of
+			<quote>Connection</quote>
+			and
+			<quote>Statement</quote>
+			to get the SQL and then parse it to do left works, but several
+			headaches come to bother. You will find that several methods'
+			lifecycle and invocation logic will mismatch with each other, you
+			will find you have to trace the method invocation sequences, you will
+			also find you have to take care of all of the database metadata
+			things.
+		</para>
+		<para>
+			You see, we do can implement a whole JDBC driver to do works like
+			current
+			<quote>Cobar</quote>
+			does, but it's not an easy thing with limit time frame.
+		</para>
+	</sect1>
+	<sect1 id="dal solution" xreflabel="DAL(Data Access Layer) Solution">
+		<title>DAL(Data Access Layer) Solution</title>
+		<para>
+			We can do the same thing on DAL. Many benefits are avaialble,
+			including that:
+			<itemizedlist>
+				<listitem>
+					<para>we can make a standard development process;</para>
+				</listitem>
+				<listitem>
+					<para>we can simplify the implementation of data access routing;
+					</para>
+				</listitem>
+				<listitem>
+					<para>furthermore, if more shards or other storage services(e.g. KV
+						store) are required, the applications won't need any changes,
+						'cause the DAL has hidden these changes for them.</para>
+				</listitem>
+			</itemizedlist>
+		</para>
+		<para>
+			If we do use such solution on DAL, we can externalize the
+			sharding strategies and rules, the routing rules can be configured in
+			a consistent way(Annotation, or external XML configuration files),
+			and the rules can be defined only as per the type of DO(Data Object)
+			and their attributes. It's so simple and flexible, the complexity
+			of
+			SQL parsing is involved.
+		</para>
+		<para>
+			But such solution impacts too much to the current applications,
+			so althought it's a good go, we can't make it run for the time being.
+		</para>
+	</sect1>
+	<sect1>
+		<title>The Solution That's Specific To ICBU Applications</title>
+		<para>
+			After thinking on multiple factors like the time frame limitation,
+			the compatibility to available applications, etc, we give out a
+			solution that stands between
+			<xref linkend="jdbc solution" />
+			and
+			<xref linkend="dal solution" />
+			.
+		</para>
+		<para>
+			We internally use iBatis to do data access, in order to
+			accelerate the development process, we use SqlMapClientTemplate of
+			spring framework, too. To make less impacts on current applications,
+			we have to extend the SqlMapClientTemplate class, because all of the
+			data access requests will be sent out by this class, and
+			if we add
+			routing support in it, then it can route different data
+			access
+			requests to their specific data shards as per the routing
+			rules we
+			provide.
+			</para>
+		<para>
+			In fact, this is indeed the solution we choose to use in the 1st
+			version
+			of CobarClient.
+		</para>
+	</sect1>
+</chapter>

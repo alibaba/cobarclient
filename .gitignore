@@ -1,1 +1,15 @@
+lib_managed/
+project/target/*
+project/project/target/*
+project/build/target/*
+project/boot/*
+project/plugins/lib_managed/*
+project/plugins/project/*
+project/plugins/target/*
+project/plugins/src_managed/*
 target/
+.idea/
+.idea_modules/
+*.iml
+.DS_Store
+out/

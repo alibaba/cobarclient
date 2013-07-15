@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="roma_application_redirect" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+	<title>Cobar Client使用迁移手册(Cobar Client Migration Guide)</title>
+	<para>
+		CobarClient主要针对现有网站应用中使用iBatis做数据访问层这一情况而设计开发,如果你的应用程序最初使用了Spring提供的SqlMapClientTemplate的话, 
+		那迁移到CobarClient实际上仅仅是稍微改一下应用程序的配置而已.
+	</para>
+	<para>
+		假设原有的应用程序依赖于Spring的SqlMapClientTemplate进行数据访问, 那么, 使用Cobar Client之后, 只要修改配置, 让应用程序依赖于CobarClient的CobarSqlMapClientTemplate即可. 
+		同时, 与数据访问相关的事务管理也需要从使用Spring原生的DataSourceTransactionManager, 换为CobarClient提供的MultipleDataSourcesTransactionManager, 整个迁移的概况类似于:
+		<programlisting language="xml"><![CDATA[
+使用CobarClient之前:
+
+<bean id="sqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+	<property name="sqlMapClient" ref="sqlMapClient"/>
+	...
+</bean>
+
+<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	<property name="dataSource" ref="dataSource"/>
+	...
+</bean>
+
+<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+	<property name="dataSource" ref="dataSource" />
+	<property name="configLocation" value="classpath:META-INF/ibatis/sqlmap-config.xml" />
+</bean>
+
+<bean id="dataSource" ...>
+	...
+</bean>
+		]]></programlisting>
+		<programlisting  language="xml"><![CDATA[
+使用CobarClient之后:
+
+<bean id="sqlMapClientTemplate" class="com.alibaba.cobar.client.CobarSqlMapClientTemplate">
+	<property name="sqlMapClient" ref="sqlMapClient"/>
+	...
+</bean>
+
+<bean id="transactionManager" class="com.alibaba.cobar.client.transaction.MultipleDataSourcesTransactionManager">
+	...
+</bean>
+
+<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+	<property name="dataSource" ref="dataSource" />
+	<property name="configLocation" value="classpath:META-INF/ibatis/sqlmap-config.xml" />
+</bean>
+
+<bean id="dataSource" ...>
+	...
+</bean>
+		]]></programlisting>
+		可见, 基本上只需要替换两处配置即可完成迁移工作.
+	</para>
+	<para>
+		不过, 以上只是简化后的迁移场景, 实际上, 还有一些细节需要我们完善之后, 才能完全的完成整个的迁移工作.
+	</para>
+	<sect1>
+		<title>
+			数据分区多数据源的依赖管理说明
+		</title>
+		<para>
+		在单数据源的情况下, SqlMapClientTemplate(或者说它依赖的SqlMapClient)以及对应进行事务管理的DataSourceTransactionManager都会引用同一个数据源;
+		而当应用进行数据拆分之后, 物理上将对应多个数据源, 要进行数据访问和事务管理, 我们现在必须针对数据拆分之后对应的多个数据源进行.为了同一的管理这种依赖, CobarClient提供了ICobarDataSourceService这一抽象接口用于归类管理数据拆分后对应的多个数据源, 
+		com.alibaba.cobar.client.CobarSqlMapClientTemplate和com.alibaba.cobar.client.transaction.MultipleDataSourcesTransactionManager现在将都依赖于某个ICobarDataSourceService的实现来提供对某些数据源的依赖, 这样, 
+		最初的配置将演化为如下的形式:
+		<programlisting language="xml"><![CDATA[
+<bean id="dataSources" class="某个ICobarDataSourceService实现类">
+	...
+</bean>
+
+<bean id="transactionManager"
+	class="com.alibaba.cobar.client.transaction.MultipleDataSourcesTransactionManager">
+	<property name="cobarDataSourceService" ref="dataSources" />
+</bean>
+
+<bean id="sqlMapClientTemplate" class="com.alibaba.cobar.client.CobarSqlMapClientTemplate">
+	<property name="sqlMapClient" ref="sqlMapClient" />
+	<property name="cobarDataSourceService" ref="dataSources" />
+	...
+</bean>
+
+<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+	<property name="dataSource" ref="dataSource" />
+	<property name="configLocation" value="classpath:META-INF/ibatis/sqlmap-config.xml" />
+</bean>
+		]]></programlisting>
+		也就是说, 现在MultipleDataSourcesTransactionManager和CobarSqlMapClientTemplate都有一个<emphasis>cobarDataSourceService</emphasis>依赖, 该依赖都将引用同一个bean定义<emphasis>dataSources</emphasis>(注意这里的名称为复数).
+		该bean定义将对应某个ICobarDataSourceService实现类,
+		当前, 我们提供了com.alibaba.cobar.client.datasources.DefaultCobarDataSourceService作为ICobarDataSourceService的默认实现, 其常见配置如下:
+		<programlisting language="xml"><![CDATA[
+<bean id="dataSources" class="com.alibaba.cobar.client.datasources.DefaultCobarDataSourceService">
+	<property name="dataSourceDescriptors">
+		<set>
+			<bean class="com.alibaba.cobar.client.datasources.CobarDataSourceDescriptor">
+				<property name="identity" value="partition1"/>
+				<property name="targetDataSource" ref="partition1_main"/>
+				<property name="targetDetectorDataSource" ref="partition1_main"/>
+				<property name="standbyDataSource" ref="partition1_standby"/>
+				<property name="standbyDetectorDataSource" ref="partition1_standby"/>
+			</bean>
+			<bean class="com.alibaba.cobar.client.datasources.CobarDataSourceDescriptor">
+				<property name="identity" value="partition2"/>
+				<property name="targetDataSource" ref="partition2_main"/>
+				<property name="targetDetectorDataSource" ref="partition2_main"/>
+				<property name="standbyDataSource" ref="partition2_standby"/>
+				<property name="standbyDetectorDataSource" ref="partition2_standby"/>
+			</bean>
+		</set>
+	</property>
+	<property name="haDataSourceCreator">
+		<bean class="com.alibaba.cobar.client.datasources.ha.FailoverHotSwapDataSourceCreator">
+			<property name="detectingSql" value="update cobarha set timeflag=CURRENT_TIMESTAMP()"/>
+		</bean>
+	</property>
+</bean>
+
+<bean id="partition1_main" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+	<property name="driverClass" value="org.h2.Driver" />
+	<property name="jdbcUrl" value="jdbc:h2:mem:p1_main;DB_CLOSE_DELAY=-1;MODE=MySQL;LOCK_MODE=3" />
+	<property name="user" value="" />
+	<property name="password" value="" />
+	<property name="minPoolSize" value="10" />
+	<property name="maxPoolSize" value="20" />
+	<property name="maxIdleTime" value="1800" />
+	<property name="acquireIncrement" value="2" />
+	<property name="maxStatements" value="0" />
+	<property name="initialPoolSize" value="2" />
+	<property name="idleConnectionTestPeriod" value="1800" />
+	<property name="acquireRetryAttempts" value="30" />
+	<property name="breakAfterAcquireFailure" value="true" />
+	<property name="testConnectionOnCheckout" value="false" />
+</bean>
+
+<bean id="partition1_standby" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+	<property name="driverClass" value="org.h2.Driver" />
+	<property name="jdbcUrl" value="jdbc:h2:mem:p1_standby;DB_CLOSE_DELAY=-1;MODE=MySQL;LOCK_MODE=3" />
+	<property name="user" value="" />
+	<property name="password" value="" />
+	<property name="minPoolSize" value="10" />
+	<property name="maxPoolSize" value="20" />
+	<property name="maxIdleTime" value="1800" />
+	<property name="acquireIncrement" value="2" />
+	<property name="maxStatements" value="0" />
+	<property name="initialPoolSize" value="2" />
+	<property name="idleConnectionTestPeriod" value="1800" />
+	<property name="acquireRetryAttempts" value="30" />
+	<property name="breakAfterAcquireFailure" value="true" />
+	<property name="testConnectionOnCheckout" value="false" />
+</bean>
+
+<bean id="partition2_main" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+	<property name="driverClass" value="org.h2.Driver" />
+	<property name="jdbcUrl" value="jdbc:h2:mem:p2_main;DB_CLOSE_DELAY=-1;MODE=MySQL;LOCK_MODE=3" />
+	<property name="user" value="" />
+	<property name="password" value="" />
+	<property name="minPoolSize" value="10" />
+	<property name="maxPoolSize" value="20" />
+	<property name="maxIdleTime" value="1800" />
+	<property name="acquireIncrement" value="2" />
+	<property name="maxStatements" value="0" />
+	<property name="initialPoolSize" value="2" />
+	<property name="idleConnectionTestPeriod" value="1800" />
+	<property name="acquireRetryAttempts" value="30" />
+	<property name="breakAfterAcquireFailure" value="true" />
+	<property name="testConnectionOnCheckout" value="false" />
+</bean>
+
+<bean id="partition2_standby" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+	<property name="driverClass" value="org.h2.Driver" />
+	<property name="jdbcUrl" value="jdbc:h2:mem:p2_standby;DB_CLOSE_DELAY=-1;MODE=MySQL;LOCK_MODE=3" />
+	<property name="user" value="" />
+	<property name="password" value="" />
+	<property name="minPoolSize" value="10" />
+	<property name="maxPoolSize" value="20" />
+	<property name="maxIdleTime" value="1800" />
+	<property name="acquireIncrement" value="2" />
+	<property name="maxStatements" value="0" />
+	<property name="initialPoolSize" value="2" />
+	<property name="idleConnectionTestPeriod" value="1800" />
+	<property name="acquireRetryAttempts" value="30" />
+	<property name="breakAfterAcquireFailure" value="true" />
+	<property name="testConnectionOnCheckout" value="false" />
+</bean>
+		]]></programlisting>
+	DefaultCobarDataSourceService引用一组com.alibaba.cobar.client.datasources.CobarDataSourceDescriptor, 每一个com.alibaba.cobar.client.datasources.CobarDataSourceDescriptor
+	描述了针对某一数据拆分分区的必要依赖, 这包括:
+	<itemizedlist>
+		<listitem>
+			<formalpara>
+				<title>identity</title>
+				<para>数据分区的唯一标志, 该标志不可与其它数据分区的标志冲突, 在定义路由规则的时候, 数据分区标志将成为路由规则的一部分.</para>
+			</formalpara>
+		</listitem>
+		<listitem>
+			<formalpara>
+				<title>targetDataSource</title>
+				<para>主要目标数据源的依赖引用, 通常意义上, 应用启动的时候该数据源必须是Active的.</para>
+			</formalpara>
+		</listitem>
+		<listitem>
+			<formalpara>
+				<title>targetDetectorDataSource</title>
+				<para>主要目标数据源伴随的HA探测用数据源, 主要用于检测主要目标数据源的状态, 通常指向与主要目标数据源相同的目标数据库, 但数据库连接池要单独配置, 以防止相互干扰.</para>
+			</formalpara>
+		</listitem>
+		<listitem>
+			<formalpara>
+				<title>standbyDataSource</title>
+				<para>与主要目标数据源并列的备用数据源, 当主要目标数据源出现问题之后, 如果启用了CobarClient的HA功能支持, CobarClient将自动将数据访问切换到该备用数据源上.</para>
+			</formalpara>
+		</listitem>
+		<listitem>
+			<formalpara>
+				<title>standbyDetectorDataSource</title>
+				<para>备用数据源对应的HA探测用数据源.</para>
+			</formalpara>
+		</listitem>
+	</itemizedlist>
+	<note>
+		<para>
+			因为当前网站的数据源配置都是通过JNDI进行, CobarClient无法统一取得数据库连接等相关信息, 也就无法根据同一份配置信息自行创建相应的数据库连接池, 
+			所以, 只好需要应用程序方针对每一个目标数据源再多配置一个用于HA状态探测用的数据源引用.
+		</para>
+	</note>
+	当前CobarDataSourceDescriptor之所以需要这些信息是因为现在网站最主要的数据库部署结构是HA双机热备的水平切分数据库集群, 但后期如果有其它的数据库部署结构, CobarDataSourceDescriptor也可能随着数据库部署结构的调整而调整.
+	<tip>
+		<para>
+			如果不需要HA双机热备支持, 那么可以让standby(.*)DataSource指向target(.*)DataSource相同的数据源应用, 或者如果DefaultCobarDataSourceService的haDataSourceCreator没有指定的话, 
+			standbyDataSource,standbyDetectorDataSource和targetDetectorDataSource可以完全不配置.
+		</para>
+		<para>
+			CobarDataSourceDescriptor引用的数据源可以来自JNDI绑定的数据源, 也可以来自容器内定义的数据源(如上配置所示, 为了测试,我们使用了Spring容器内定义的C3P0数据源), 
+			甚至其它形式提供的数据源, 只要为其提供标准的JDBC API中的DataSource接口实现即可.
+		</para>
+	</tip>
+	</para>
+	<para>
+		DefaultCobarDataSourceService除了依赖一组CobarDataSourceDescriptor, 它还依赖于相应的IHADataSourceCreator来进行数据库的HA支持, 如果没有提供相应的IHADataSourceCreator实现类, 
+		DefaultCobarDataSourceService默认会使用NonHADataSourceCreator, 即不创建支持HA的数据源. CobarClient默认提供了FailoverHotSwapDataSourceCreator以支持HA, 应用方可以根据情况提供自己的IHADataSourceCreator实现来满足特定场景需要.
+	</para>
+	<para>
+		有关数据切分分区多数据源管理相关的迁移说明就说到这里, 下面我们来进一步看一下其它相关配置细节.
+	</para>
+	</sect1>
+	<sect1>
+		<title>CobarSqlMapClientTemplate其它相关配置说明</title>
+		<para>
+			因为com.alibaba.cobar.client.transaction.MultipleDataSourcesTransactionManager属于标准的Spring的PlatformTransactionManager实现, 除了唯一特定于CobarClient的ICobarDataSourceService依赖之外, 
+			其它都继承自Spring标准类AbstractPlatformTransactionManager, 故此其配置在这里就不做更多说明了,应用方可以参阅Spring的相关文档获取更多配置和使用信息. 下面我们主要针对CobarSqlMapClientTemplate的相关依赖进行进一步说明.
+
+		</para>
+		<sect2>
+			<title>数据访问路由相关配置</title>
+			<para>
+				CobarSqlMapClientTemplate依赖某个ICobarDataSourceService实现类来获取数据拆分分区相关信息, 为了将相应的数据访问请求路由到相应的数据分区, 它也需要依赖于一个ICobarRouter实现类以决定如何进行数据访问请求的路由.
+				所以, 一个功能完备的CobarSqlMapClientTemplate配置应该如下所示:
+				<programlisting language="xml"><![CDATA[
+<bean id="sqlMapClientTemplate" class="com.alibaba.cobar.client.CobarSqlMapClientTemplate">
+	<property name="sqlMapClient" ref="sqlMapClient" />
+	<property name="cobarDataSourceService" ref="dataSources" />
+	<property name="router" ref="internalRouter" />
+	<property name="sqlAuditor">
+		<bean class="com.alibaba.cobar.client.audit.SimpleSqlAuditor" />
+	</property>
+	<property name="profileLongTimeRunningSql" value="true" />
+	<property name="longTimeRunningSqlIntervalThreshold" value="3600000" />
+</bean>
+
+<bean id="internalRouter"
+	class="com.alibaba.cobar.client.router.config.CobarInteralRouterXmlFactoryBean">
+	<property name="functionsMap">
+		<map>
+			<entry key="mod">
+				<bean class="com.alibaba.cobar.client.router.rules.support.ModFunction">
+					<constructor-arg><value>128</value></constructor-arg>
+				</bean>
+			</entry>
+		</map>
+	</property>
+	<property name="configLocations">
+		<list>
+			<value>classpath:META-INF/routing/offer-sql-action-rules.xml</value>
+			<value>classpath:META-INF/routing/offer-sharding-rules-on-namespace.xml</value>
+		</list>
+	</property>
+</bean>
+				]]></programlisting>
+				<note>
+					<para>关于sqlAuditor, profileLongTimeRunningSql, longTimeRunningSqlIntervalThreshold等配置项, 可以参考CobarClient Reference文档, 他们是可选的, 所以这里不做更多说明.</para>
+				</note>
+				Cobar Client默认提供的ICobarRouter实现类是com.alibaba.cobar.client.router.CobarClientInternalRouter, 为了简化配置, 我们为其提供了一个FactoryBean用于简化配置, 即com.alibaba.cobar.client.router.config.CobarInteralRouterXmlFactoryBean,
+				其中最主要的配置项为configLocations(或者configLocation, 如果只需要指定一个路由规则说明文件的话), 该配置项主要用于指定路由规则说明文件所在的位置, com.alibaba.cobar.client.router.CobarClientInternalRouter将根据这些路由规则说明文件中的路由规则进行数据访问请求的路由.
+				下面是一个典型的路由规则说明文件实例:
+				<programlisting language="xml"><![CDATA[
+<rules>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Offer</namespace>
+    <shardingExpression>mod.apply(memberId)==1</shardingExpression>
+    <shards>partition1</shards>
+  </rule>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Offer</namespace>
+    <shardingExpression>mod.apply(memberId)==2</shardingExpression>
+    <shards>partition2</shards>
+  </rule>
+</rules>
+				]]></programlisting>
+				如果我们注意到在配置com.alibaba.cobar.client.router.config.CobarInteralRouterXmlFactoryBean的时候,我们通过functionsMap属性指定了一个自定义函数Map的话, 
+				那么,在路由规则的shardingExpression中, 就不难发现该自定义函数的身影了.
+			</para>
+			<para>
+				因为以上路由规则定义很简单,所以我们没有强制要求使用DTD或者XML Schema,但实际上, 路由规则的DTD可以简单描述如下:
+				<programlisting><![CDATA[
+<?xml version="1.0"?  encoding="UTF-8"?>
+<!ELEMENT rules (rule)+>
+<!ELEMENT rule ((namespace|sqlmap),shardingExpression,shards)>
+<!ELEMENT namespace (#PCDATA)>
+<!ELEMENT sqlmap (#PCDATA)>
+<!ELEMENT shardingExpression (#PCDATA)>
+<!ELEMENT shards (#PCDATA)>
+				]]></programlisting>
+				路由规则在当前的CobarClient中分为四种类型, 详情参见CobarClient Reference文档. 总之, 有了以上配置之后, 你就可以开始使用Cobar Client进行数据切分集群下的数据访问之旅了.
+			</para>
+		</sect2>
+		<sect2>
+			<title>What's Next?</title>
+			<para>
+				迁移文档只是简单说明了使用CobarClient需要做的最基本工作, 但过多细节不会涉及, 比如路由规则的详细定义如何进行, HA如何配置等等, 要了解这些更细节的信息, 
+				请进一步参考CobarClient参考手册.
+			</para>
+		</sect2>
+	</sect1>
+	
+</chapter>

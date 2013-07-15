@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="roma_application_redirect" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+		<title>CobarClient发起的背景</title>
+		<para>
+			现有的Cobar方案需要单独的服务器来运行, 为了保证性能和可用性, 通常最少需要两台独立服务器.国际站应用方出于扩展和可用性等因素考虑, 
+			希望一种不依赖于独立服务器的Cobar解决方案, 鉴于此, 决定开发Cobar的Client版本, 该版本主要面向小规模的数据库sharding集群访问, 
+			因现有的Cobar已经在中文站等多个项目中成功应用并实施, 如果CobarClient无法满足进一步的需求,可以转而使用现有的Cobar方案.
+		</para>
+		<para>
+			所以, CobarClient的使用原则上只限定于某些特定场景.
+		</para>
+</chapter>

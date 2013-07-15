@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE rules SYSTEM "rules.dtd">
+<rules>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Tweet</namespace>
+    <shards>partition1</shards>
+  </rule>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Follower</namespace>
+    <shards>partition2</shards>
+  </rule>
+</rules>

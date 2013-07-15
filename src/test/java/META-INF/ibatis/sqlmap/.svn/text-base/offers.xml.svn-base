@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="GB2312"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="com.alibaba.cobar.client.entities.Offer">
+
+	<typeAlias alias="offer" type="com.alibaba.cobar.client.entities.Offer" />
+
+	<resultMap id="offer" class="offer">
+		<result property="id"     column="id" />
+		<result property="memberId"   column="memberId" />
+		<result property="subject"   column="subject" />
+		<result property="gmtUpdated"   column="gmtUpdated" />
+	</resultMap>
+
+	<insert id="create">
+		INSERT INTO offers(memberId, subject, gmtUpdated) VALUES(#memberId#, #subject#, #gmtUpdated#)
+		<selectKey keyProperty="id" resultClass="long">
+			SELECT LAST_INSERT_ID();
+        </selectKey>
+	</insert>
+	
+	<insert id="batchInsert" parameterClass="java.util.List">
+		INSERT INTO offers(memberId, subject, gmtUpdated) VALUES
+		<iterate conjunction=",">
+			(#[].memberId#,#[].subject#, #[].gmtUpdated#)
+		</iterate>
+	</insert>
+	
+	<delete id="delete">
+		delete from offers where id=#value#
+	</delete>
+	
+	<delete id="deleteByMemberId">
+		delete from offers where memberId=#memberId#
+	</delete>
+	
+	<update id="update">
+		UPDATE offers SET subject=#subject#, gmtUpdated=#gmtUpdated# WHERE id=#id#
+	</update>
+	
+	<select id="load" resultMap="offer">
+		SELECT * FROM offers where id=#value#
+	</select>
+	
+	<select id="findByMemberId" parameterClass="offer" resultMap="offer">
+		SELECT * FROM offers where memberId=#memberId#
+	</select>
+	
+	<select id="findAll" resultMap="offer">
+		SELECT * FROM offers	
+	</select>
+	
+	<select id="findByMemberIdRange" resultMap="offer">
+		<![CDATA[
+		SELECT * FROM offers where memberId < #value#
+		]]>
+	</select>
+	
+	<select id="findAllWithOrderByOnSubject" resultMap="offer">
+		<![CDATA[SELECT * FROM offers order by subject]]>
+	</select>
+</sqlMap>

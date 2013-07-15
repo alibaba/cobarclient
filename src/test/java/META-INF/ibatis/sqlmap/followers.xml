@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="GB2312"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="com.alibaba.cobar.client.entities.Follower">
+
+	<typeAlias alias="flr" type="com.alibaba.cobar.client.entities.Follower" />
+
+	<resultMap id="follower" class="flr">
+		<result property="id"     column="id" />
+		<result property="name"   column="name" />
+	</resultMap>
+
+	<insert id="create">
+		insert into followers(name) values(#name#)
+		<selectKey keyProperty="id" resultClass="long">
+			SELECT LAST_INSERT_ID();
+        </selectKey>
+	</insert>
+	
+	<insert id="batchInsert" parameterClass="java.util.List">
+		insert into followers(name) values 
+		<iterate conjunction=",">
+			(#[].name#)
+		</iterate>
+	</insert>
+	
+	<delete id="deleteByName">
+		delete from followers where name=#name#
+	</delete>
+	
+	<update id="update">
+		update followers set name=#name# where id=#id#
+	</update>
+	
+	<select id="load" resultMap="follower">
+		select * from followers where id=#value#
+	</select>
+	
+	<select id="findAll" resultMap="follower">
+		select * from followers
+	</select>
+	
+	<select id="finaByName" resultMap="follower">
+		select * from followers where name=#value#
+	</select>
+	
+	<select id="finaByNameAlike" resultMap="follower">
+		select * from followers where name like '%'||#value#||'%'
+	</select>
+	
+</sqlMap>

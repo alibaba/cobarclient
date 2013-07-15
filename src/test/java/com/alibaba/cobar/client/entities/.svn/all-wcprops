@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client/entities
+END
+Offer.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client/entities/Offer.java
+END
+Tweet.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client/entities/Tweet.java
+END
+Follower.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/com/alibaba/cobar/client/entities/Follower.java
+END

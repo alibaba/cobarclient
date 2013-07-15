@@ -1,0 +1,20 @@
+<rules>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entity.Follower</namespace>
+    <shards>partition1</shards>
+  </rule>
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entity.Follower.create</sqlmap>
+    <shards>p1, p2</shards>
+  </rule>
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entity.Follower.create</sqlmap>
+    <shardingExpression>id&gt;10000 and id&lt; 20000</shardingExpression>
+    <shards>p1, p2</shards>
+  </rule>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entity.Tweet</namespace>
+    <shardingExpression>id&gt;10000 and id&lt; 20000</shardingExpression>
+    <shards>p1, p2</shards>
+  </rule>
+</rules>

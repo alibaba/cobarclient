@@ -1,0 +1,8 @@
+<rules>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entity.Follower</namespace>
+    <sqlmap>com.alibaba.cobar.client.entity.Follower.create</sqlmap>
+    <shardingExpression>id&gt;10000 and id&lt; 20000</shardingExpression>
+    <shards>p1, p2</shards>
+  </rule>
+</rules>

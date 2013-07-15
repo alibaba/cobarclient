@@ -1,0 +1,6 @@
+<rules>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entity.Follower</namespace>
+    <shardingExpression>id&gt;10000 and id&lt; 20000</shardingExpression>
+  </rule>
+</rules>

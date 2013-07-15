@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="roma_application_redirect" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+<title>CobarClient展望</title>
+		<para>
+			希望CobarClient从更抽象的层次来屏蔽分布式数据以及不同数据存储服务之间的差异性, 所以, 我们希望提供一个统一的数据访问层(DAL), 由该DAL来规范和统一数据访问行为,同时屏蔽分布式场景下的数据访问的复杂度.
+			另外, 随着需求的变更以及架构的演化,可以将数据的复制和同步, 缓存的接入, 实时的索引构建等等, 都可以通过我们的DAL层进行, 对于应用方来说, 他们只需要关注应用端的关注点, 而不需要关注DAL之后发生了什么,变更了什么,增加和减少了什么...
+		</para>
+</chapter>

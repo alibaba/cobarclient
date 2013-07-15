@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/spring
+END
+namespace-sharding-router-appctx.xml
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/spring/namespace-sharding-router-appctx.xml
+END
+sqlaction-sharding-router-appctx.xml
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/spring/sqlaction-sharding-router-appctx.xml
+END
+cobar-client-custom-merger-appctx.xml
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/spring/cobar-client-custom-merger-appctx.xml
+END
+namespace-router-appctx.xml
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/spring/namespace-router-appctx.xml
+END
+sqlaction-router-appctx.xml
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/spring/sqlaction-router-appctx.xml
+END
+namespace-sqlaction-composed-router-appctx.xml
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/spring/namespace-sqlaction-composed-router-appctx.xml
+END
+datasources-appctx.xml
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/spring/datasources-appctx.xml
+END
+cobar-client-appctx.xml
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/spring/cobar-client-appctx.xml
+END
+cobar-client-offer-services-appctx.xml
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/cobarclient/!svn/ver/8/trunk/cobar-client/src/test/java/META-INF/spring/cobar-client-offer-services-appctx.xml
+END

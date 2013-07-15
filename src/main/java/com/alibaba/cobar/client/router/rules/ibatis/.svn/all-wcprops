@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/cobarclient/!svn/ver/11/trunk/cobar-client/src/main/java/com/alibaba/cobar/client/router/rules/ibatis
+END
+IBatisNamespaceRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/svn/cobarclient/!svn/ver/11/trunk/cobar-client/src/main/java/com/alibaba/cobar/client/router/rules/ibatis/IBatisNamespaceRule.java
+END
+IBatisNamespaceShardingRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 139
+/svn/cobarclient/!svn/ver/11/trunk/cobar-client/src/main/java/com/alibaba/cobar/client/router/rules/ibatis/IBatisNamespaceShardingRule.java
+END
+AbstractIBatisOrientedRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 138
+/svn/cobarclient/!svn/ver/11/trunk/cobar-client/src/main/java/com/alibaba/cobar/client/router/rules/ibatis/AbstractIBatisOrientedRule.java
+END
+IBatisSqlActionRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/svn/cobarclient/!svn/ver/11/trunk/cobar-client/src/main/java/com/alibaba/cobar/client/router/rules/ibatis/IBatisSqlActionRule.java
+END
+IBatisSqlActionShardingRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 139
+/svn/cobarclient/!svn/ver/11/trunk/cobar-client/src/main/java/com/alibaba/cobar/client/router/rules/ibatis/IBatisSqlActionShardingRule.java
+END

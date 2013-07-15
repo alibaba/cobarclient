@@ -1,0 +1,10 @@
+<rules>
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entities.Follower.finaByName</sqlmap>
+    <shards>partition2</shards>
+  </rule>
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entities.Follower.findAll</sqlmap>
+    <shards>partition1, partition2</shards>
+  </rule>
+</rules>
