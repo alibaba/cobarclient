@@ -44,6 +44,35 @@
 		<file_encoding>UTF-8</file_encoding>
 	</properties>
 
+	<profiles>
+		<profile>
+			<id>release-sign-artifacts</id>
+			<activation>
+				<property>
+					<name>performRelease</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.1</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 	<build>
 		<plugins>
@@ -85,19 +114,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-		        <groupId>org.apache.maven.plugins</groupId>
-		        <artifactId>maven-gpg-plugin</artifactId>
-		        <executions>
-		          <execution>
-		            <id>sign-artifacts</id>
-		            <phase>verify</phase>
-		            <goals>
-		              <goal>sign</goal>
-		            </goals>
-		          </execution>
-		        </executions>
-		    </plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.2-beta-5</version>
