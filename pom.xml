@@ -8,7 +8,7 @@
 	<groupId>com.alibaba.cobar</groupId>
 	<artifactId>cobar-client</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.5</version>
+	<version>1.0.6-SNAPSHOT</version>
 	<name>cobar-client</name>
     <description>CobarClient(CC) is a lightweight distributed data access layer which is an extension to and wrapper of iBatis(now, MyBatis) in Spring framework.</description>
 	<url>http://code.alibabatech.com/wiki/display/CobarClient/Home</url>
