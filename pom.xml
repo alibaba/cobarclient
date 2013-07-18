@@ -1,13 +1,42 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
 	<groupId>com.alibaba.cobar</groupId>
 	<artifactId>cobar-client</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0.5</version>
 	<name>cobar-client</name>
-	<url>http://maven.apache.org</url>
+    <description>CobarClient(CC) is a lightweight distributed data access layer which is an extension to and wrapper of iBatis(now, MyBatis) in Spring framework.</description>
+	<url>http://code.alibabatech.com/wiki/display/CobarClient/Home</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+		<connection>scm:git:git@github.com:alibaba/cobarclient.git</connection>
+		<developerConnection>scm:git:git@github.com:alibaba/cobarclient.git</developerConnection>
+		<url>git@github.com:alibaba/cobarclient.git</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>fujohnwang</id>
+            <name>王福强</name>
+            <email>fujohnwang@gmail.com</email>
+            <organization>Alibaba</organization>
+        </developer>
+    </developers>
+
 
 	<properties>
 		<java_source_version>1.5</java_source_version>
@@ -30,12 +59,45 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
 					<charset>${file_encoding}</charset>
 					<encoding>${file_encoding}</encoding>
 				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
+			<plugin>
+		        <groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-gpg-plugin</artifactId>
+		        <executions>
+		          <execution>
+		            <id>sign-artifacts</id>
+		            <phase>verify</phase>
+		            <goals>
+		              <goal>sign</goal>
+		            </goals>
+		          </execution>
+		        </executions>
+		    </plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.2-beta-5</version>
