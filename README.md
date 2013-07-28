@@ -11,6 +11,12 @@ you can start with cobar-client by reading the docuemntation bundled with the di
 GL & HF with cobar-client!
 
 
+
+## About The Versions
+- cobarclient1.x is for spring2.5.6 and ibatis2.3.x
+- cobarclient2.x is for spring3.x and ibatis2.3.x
+- cobarclient3.x is for spring3.x and mybatis 3.x
+
 ## Lisence 
 <pre>
 Apache License
