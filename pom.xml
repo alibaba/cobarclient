@@ -241,7 +241,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		-->
 
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -255,12 +254,15 @@
 			<version>5.1.12</version>
 			<scope>test</scope>
 		</dependency>
+
+		-->
+
+
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
-			<version>5.11</version>
+			<version>6.8.5</version>
 			<scope>test</scope>
-			<classifier>jdk15</classifier>
 		</dependency>
 	</dependencies>
 </project>

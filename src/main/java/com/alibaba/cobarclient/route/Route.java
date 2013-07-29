@@ -22,6 +22,7 @@ public class Route {
     public boolean apply(String action, Object argument) {
         if (sqlmap == null) return false;
         if (!sqlmap.equals(action)) return false;
+        if (expression == null) return true;
         if (expression != null && argument != null && expression.apply(argument)) return true;
         return false;
     }
