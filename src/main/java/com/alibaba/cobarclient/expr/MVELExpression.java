@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class MVELExpression extends AbstractExpression {
 
-    private Map<String, Object> functions;
+    private Map<String, Object> functions = new HashMap<String, Object>();
 
     public MVELExpression(String expression) {
         super(expression);
@@ -16,7 +16,6 @@ public class MVELExpression extends AbstractExpression {
 
     public MVELExpression(String expression, Map<String, Object> functions) {
         super(expression);
-        this.functions = new HashMap<String, Object>();
         this.functions.putAll(functions);
     }
 
