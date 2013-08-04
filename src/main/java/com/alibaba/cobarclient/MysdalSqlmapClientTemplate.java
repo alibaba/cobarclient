@@ -1,11 +1,13 @@
 package com.alibaba.cobarclient;
 
 import com.alibaba.cobarclient.route.Router;
+import com.ibatis.sqlmap.client.SqlMapExecutor;
 import com.ibatis.sqlmap.client.SqlMapSession;
 import com.ibatis.sqlmap.client.event.RowHandler;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
+import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.orm.ibatis.SqlMapClientCallback;
 import org.springframework.orm.ibatis.SqlMapClientTemplate;
@@ -68,97 +70,239 @@ public class MysdalSqlmapClientTemplate extends SqlMapClientTemplate implements 
 
     @Override
     public int delete(String statementName) throws DataAccessException {
-        return super.delete(statementName);    //To change body of overridden methods use File | Settings | File Templates.
+        return this.delete(statementName, null);
     }
 
     @Override
-    public int delete(String statementName, Object parameterObject) throws DataAccessException {
-        return super.delete(statementName, parameterObject);    //To change body of overridden methods use File | Settings | File Templates.
+    public int delete(final String statementName, final Object parameterObject) throws DataAccessException {
+        Set<Shard> shards = getRouter().route(statementName, parameterObject);
+        if (shards.isEmpty()) return super.delete(statementName, parameterObject);
+        if (shards.size() == 1) {
+            return CURRENT_THREAD_SQLMAP_CLIENT_TEMPLATES.get(shards.iterator().next().getId()).delete(statementName, parameterObject);
+        } else {
+            List results = execute(shards, new SqlMapClientCallback<Integer>() {
+                public Integer doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+                    return executor.delete(statementName, parameterObject);
+                }
+            });
+            int count = 0;
+            for (Object i : results) {
+                count += (Integer) i;
+            }
+            return count;
+        }
     }
 
     @Override
     public void delete(String statementName, Object parameterObject, int requiredRowsAffected) throws DataAccessException {
-        super.delete(statementName, parameterObject, requiredRowsAffected);    //To change body of overridden methods use File | Settings | File Templates.
+        int actualRowsAffected = this.delete(statementName, parameterObject);
+        if (actualRowsAffected != requiredRowsAffected) {
+            throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(
+                    statementName, requiredRowsAffected, actualRowsAffected);
+        }
     }
 
     @Override
     public Object insert(String statementName) throws DataAccessException {
-        return super.insert(statementName);    //To change body of overridden methods use File | Settings | File Templates.
+        return this.insert(statementName, null);
     }
 
     @Override
-    public Object insert(String statementName, Object parameterObject) throws DataAccessException {
-        return super.insert(statementName, parameterObject);    //To change body of overridden methods use File | Settings | File Templates.
+    public Object insert(final String statementName, final Object parameterObject) throws DataAccessException {
+        Set<Shard> shards = getRouter().route(statementName, parameterObject);
+        if (shards.isEmpty()) return super.insert(statementName, parameterObject);
+        if (shards.size() == 1) {
+            return CURRENT_THREAD_SQLMAP_CLIENT_TEMPLATES.get(shards.iterator().next().getId()).insert(statementName, parameterObject);
+        } else {
+            return execute(shards, new SqlMapClientCallback<Object>() {
+                public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+                    return executor.insert(statementName, parameterObject);
+                }
+            });
+        }
     }
 
     @Override
     public List queryForList(String statementName) throws DataAccessException {
-        return super.queryForList(statementName);    //To change body of overridden methods use File | Settings | File Templates.
+        return this.queryForList(statementName, null);
     }
 
     @Override
-    public List queryForList(String statementName, Object parameterObject) throws DataAccessException {
-        return super.queryForList(statementName, parameterObject);    //To change body of overridden methods use File | Settings | File Templates.
+    public List queryForList(final String statementName, final Object parameterObject) throws DataAccessException {
+        Set<Shard> shards = getRouter().route(statementName, parameterObject);
+        if (shards.isEmpty()) return super.queryForList(statementName, parameterObject);
+        if (shards.size() == 1) {
+            return CURRENT_THREAD_SQLMAP_CLIENT_TEMPLATES.get(shards.iterator().next().getId()).queryForList(statementName, parameterObject);
+        } else {
+            return queryForListBase(shards, new SqlMapClientCallback<List>() {
+                public List doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+                    return executor.queryForList(statementName, parameterObject);
+                }
+            });
+        }
     }
 
     @Override
-    public List queryForList(String statementName, Object parameterObject, int skipResults, int maxResults) throws DataAccessException {
-        return super.queryForList(statementName, parameterObject, skipResults, maxResults);    //To change body of overridden methods use File | Settings | File Templates.
+    public List queryForList(final String statementName, final Object parameterObject, final int skipResults, final int maxResults) throws DataAccessException {
+        Set<Shard> shards = getRouter().route(statementName, parameterObject);
+        if (shards.isEmpty()) return super.queryForList(statementName, parameterObject, skipResults, maxResults);
+        if (shards.size() == 1) {
+            return CURRENT_THREAD_SQLMAP_CLIENT_TEMPLATES.get(shards.iterator().next().getId()).queryForList(statementName, parameterObject, skipResults, maxResults);
+        } else {
+            return queryForListBase(shards, new SqlMapClientCallback<List>() {
+                public List doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+                    return executor.queryForList(statementName, parameterObject, skipResults, maxResults);
+                }
+            });
+        }
+
     }
 
     @Override
     public List queryForList(String statementName, int skipResults, int maxResults) throws DataAccessException {
-        return super.queryForList(statementName, skipResults, maxResults);    //To change body of overridden methods use File | Settings | File Templates.
+        return this.queryForList(statementName, null, skipResults, maxResults);
+    }
+
+    /**
+     * collection and flatten the result list
+     */
+    protected List queryForListBase(Set<Shard> shards, SqlMapClientCallback<List> callback) {
+        List<List> results = execute(shards, callback);
+        List resultList = new ArrayList();         // FLATTEN the list, miss FP pattern here.
+        for (List lst : results) {
+            resultList.addAll(lst);
+        }
+        return resultList;
     }
 
     @Override
-    public Map queryForMap(String statementName, Object parameterObject, String keyProperty) throws DataAccessException {
-        return super.queryForMap(statementName, parameterObject, keyProperty);    //To change body of overridden methods use File | Settings | File Templates.
+    public Map queryForMap(final String statementName, final Object parameterObject, final String keyProperty) throws DataAccessException {
+        Set<Shard> shards = getRouter().route(statementName, parameterObject);
+        if (shards.isEmpty()) return super.queryForMap(statementName, parameterObject, keyProperty);
+        if (shards.size() == 1) {
+            return CURRENT_THREAD_SQLMAP_CLIENT_TEMPLATES.get(shards.iterator().next().getId()).queryForMap(statementName, parameterObject, keyProperty);
+        } else {
+            return queryForMapBase(shards, new SqlMapClientCallback<Map>() {
+                public Map doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+                    return executor.queryForMap(statementName, parameterObject, keyProperty);
+                }
+            });
+        }
     }
 
     @Override
-    public Map queryForMap(String statementName, Object parameterObject, String keyProperty, String valueProperty) throws DataAccessException {
-        return super.queryForMap(statementName, parameterObject, keyProperty, valueProperty);    //To change body of overridden methods use File | Settings | File Templates.
+    public Map queryForMap(final String statementName, final Object parameterObject, final String keyProperty, final String valueProperty) throws DataAccessException {
+        Set<Shard> shards = getRouter().route(statementName, parameterObject);
+        if (shards.isEmpty()) return super.queryForMap(statementName, parameterObject, keyProperty, valueProperty);
+        if (shards.size() == 1) {
+            return CURRENT_THREAD_SQLMAP_CLIENT_TEMPLATES.get(shards.iterator().next().getId()).queryForMap(statementName, parameterObject, keyProperty, valueProperty);
+        } else {
+            return queryForMapBase(shards, new SqlMapClientCallback<Map>() {
+                public Map doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+                    return executor.queryForMap(statementName, parameterObject, keyProperty, valueProperty);
+                }
+            });
+        }
+
+    }
+
+    protected Map queryForMapBase(Set<Shard> shards, SqlMapClientCallback<Map> callback) {
+        List<Map> resultList = execute(shards, callback);
+        Map map = new HashMap();
+        for (Map m : resultList) {
+            map.putAll(m);
+        }
+        return map;
     }
 
     @Override
     public Object queryForObject(String statementName) throws DataAccessException {
-        return super.queryForObject(statementName);    //To change body of overridden methods use File | Settings | File Templates.
+        return this.queryForObject(statementName, null);
     }
 
     @Override
-    public Object queryForObject(String statementName, Object parameterObject) throws DataAccessException {
-        return super.queryForObject(statementName, parameterObject);    //To change body of overridden methods use File | Settings | File Templates.
+    public Object queryForObject(final String statementName, final Object parameterObject) throws DataAccessException {
+        Set<Shard> shards = getRouter().route(statementName, parameterObject);
+        if (shards.isEmpty()) return super.queryForObject(statementName, parameterObject);
+        if (shards.size() == 1) {
+            return CURRENT_THREAD_SQLMAP_CLIENT_TEMPLATES.get(shards.iterator().next().getId()).queryForObject(statementName, parameterObject);
+        } else {
+            return execute(shards, new SqlMapClientCallback<Object>() {
+                public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+                    return executor.queryForObject(statementName, parameterObject);
+                }
+            });
+        }
     }
 
     @Override
-    public Object queryForObject(String statementName, Object parameterObject, Object resultObject) throws DataAccessException {
-        return super.queryForObject(statementName, parameterObject, resultObject);    //To change body of overridden methods use File | Settings | File Templates.
+    public Object queryForObject(final String statementName, final Object parameterObject, final Object resultObject) throws DataAccessException {
+        Set<Shard> shards = getRouter().route(statementName, parameterObject);
+        if (shards.isEmpty()) return super.queryForObject(statementName, parameterObject, resultObject);
+        if (shards.size() == 1) {
+            return CURRENT_THREAD_SQLMAP_CLIENT_TEMPLATES.get(shards.iterator().next().getId()).queryForObject(statementName, parameterObject, resultObject);
+        } else {
+            return execute(shards, new SqlMapClientCallback<Object>() {
+                public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+                    return executor.queryForObject(statementName, parameterObject, resultObject);
+                }
+            });
+        }
     }
 
     @Override
     public void queryWithRowHandler(String statementName, RowHandler rowHandler) throws DataAccessException {
-        super.queryWithRowHandler(statementName, rowHandler);    //To change body of overridden methods use File | Settings | File Templates.
+        this.queryWithRowHandler(statementName, null, rowHandler);
     }
 
     @Override
-    public void queryWithRowHandler(String statementName, Object parameterObject, RowHandler rowHandler) throws DataAccessException {
-        super.queryWithRowHandler(statementName, parameterObject, rowHandler);    //To change body of overridden methods use File | Settings | File Templates.
+    public void queryWithRowHandler(final String statementName, final Object parameterObject, final RowHandler rowHandler) throws DataAccessException {
+        Set<Shard> shards = getRouter().route(statementName, parameterObject);
+        if (shards.isEmpty()) super.queryWithRowHandler(statementName, parameterObject, rowHandler);
+        if (shards.size() == 1) {
+            CURRENT_THREAD_SQLMAP_CLIENT_TEMPLATES.get(shards.iterator().next().getId()).queryWithRowHandler(statementName, parameterObject, rowHandler);
+        } else {
+            execute(shards, new SqlMapClientCallback<Object>() {
+                public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+                    executor.queryWithRowHandler(statementName, parameterObject, rowHandler);
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
-    public int update(String statementName, Object parameterObject) throws DataAccessException {
-        return super.update(statementName, parameterObject);    //To change body of overridden methods use File | Settings | File Templates.
+    public int update(final String statementName, final Object parameterObject) throws DataAccessException {
+        Set<Shard> shards = getRouter().route(statementName, parameterObject);
+        if (shards.isEmpty()) return super.update(statementName, parameterObject);
+        if (shards.size() == 1) {
+            return CURRENT_THREAD_SQLMAP_CLIENT_TEMPLATES.get(shards.iterator().next().getId()).update(statementName, parameterObject);
+        } else {
+            List<Integer> resultList = execute(shards, new SqlMapClientCallback<Integer>() {
+                public Integer doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+                    return executor.update(statementName, parameterObject);
+                }
+            });
+            int count = 0;
+            for (Integer i : resultList) {
+                count += i;
+            }
+            return count;
+        }
     }
 
     @Override
     public void update(String statementName, Object parameterObject, int requiredRowsAffected) throws DataAccessException {
-        super.update(statementName, parameterObject, requiredRowsAffected);    //To change body of overridden methods use File | Settings | File Templates.
+        int actualRowsAffected = this.update(statementName, parameterObject);
+        if (actualRowsAffected != requiredRowsAffected) {
+            throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(
+                    statementName, requiredRowsAffected, actualRowsAffected);
+        }
     }
 
     @Override
     public int update(String statementName) throws DataAccessException {
-        return super.update(statementName);    //To change body of overridden methods use File | Settings | File Templates.
+        return this.update(statementName, null);
     }
 
 
