@@ -8,7 +8,7 @@
 	<groupId>com.alibaba.cobar</groupId>
 	<artifactId>cobar-client</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.6-SNAPSHOT</version>
+	<version>2.0.0-SNAPSHOT</version>
 	<name>cobar-client</name>
     <description>CobarClient(CC) is a lightweight distributed data access layer which is an extension to and wrapper of iBatis(now, MyBatis) in Spring framework.</description>
 	<url>http://code.alibabatech.com/wiki/display/CobarClient/Home</url>
@@ -132,77 +132,16 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>com.agilejava.docbkx</groupId>
-				<artifactId>docbkx-maven-plugin</artifactId>
-				<dependencies>
-					<dependency>
-						<groupId>org.docbook</groupId>
-						<artifactId>docbook-xml</artifactId>
-						<version>4.4</version>
-						<scope>runtime</scope>
-					</dependency>
-				</dependencies>
-				<executions>
-					<execution>
-						<id>generate-doc</id>
-						<phase>package</phase>
-						<goals>
-							<goal>generate-html</goal>
-						</goals>
-						<configuration>
-							<postProcess>
-								<copy todir="${basedir}/target/docs/">
-									<fileset dir="${basedir}/src/docs/docbook" includes="**/images/**/*" />
-									<fileset dir="${basedir}/src/docs/docbook" includes="**/css/**/*" />
-								</copy>
-							</postProcess>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
-					<sourceDirectory>${basedir}/src/docs/docbook</sourceDirectory>
-					<targetDirectory>${basedir}/target/docs</targetDirectory>
-					<includes>**/*.dbx,**/*.xml</includes>
-					<chunkedOutput>false</chunkedOutput>
-					<xincludeSupported>true</xincludeSupported>
-					<highlightSource>1</highlightSource>
-					<htmlStylesheet>css/cc.css</htmlStylesheet>
-					<generateToc>appendix toc,title
-						article/appendix nop
-						article
-						toc,title
-						book toc,title,figure,table,example,equation
-						chapter toc
-						toc,title
-						part toc,title
-						preface toc,title
-						qandadiv toc
-						qandaset toc
-						reference toc,title
-						sect1 toc
-						sect2 toc
-						sect3 toc
-						sect4 toc
-						sect5 toc
-						section toc
-						set toc,title</generateToc>
-					<generateSectionTocLevel>8</generateSectionTocLevel>
-					<chapterAutolabel>true</chapterAutolabel>
-					<sectionAutolabel>true</sectionAutolabel>
-					<sectionAutolabelMaxDepth>8</sectionAutolabelMaxDepth>
-					<sectionLabelIncludesComponentLabel>true</sectionLabelIncludesComponentLabel>
-					<tableFootnoteNumberFormat>1</tableFootnoteNumberFormat>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.5</version>
 				<configuration>
 					<testNGArtifactName>org.testng:testng</testNGArtifactName>
 					<suiteXmlFiles>
+						<!--
 						<suiteXmlFile>${basedir}/src/test/resources/testng.xml</suiteXmlFile>
 						<suiteXmlFile>${basedir}/src/test/resources/testng-sequencial-tests.xml</suiteXmlFile>
+						-->
 					</suiteXmlFiles>
 				</configuration>
 			</plugin>
@@ -253,18 +192,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>spring</artifactId>
-			<version>2.5.6.SEC02</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.5.10</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-jcl</artifactId>
-			<version>1.5.10</version>
+			<artifactId>spring-orm</artifactId>
+			<version>3.0.7.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.ibatis</groupId>
@@ -272,14 +201,9 @@
 			<version>2.3.4.726</version>
 		</dependency>
 		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.4</version>
-		</dependency>
-		<dependency>
 			<groupId>org.mvel</groupId>
 			<artifactId>mvel2</artifactId>
-			<version>2.0.16</version>
+			<version>2.1.6.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>c3p0</groupId>
@@ -293,6 +217,7 @@
 			<version>1.2.130</version>
 			<scope>test</scope>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -316,11 +241,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>com.thoughtworks.xstream</groupId>
-			<artifactId>xstream</artifactId>
-			<version>1.3.1</version>
-		</dependency>
+
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -333,12 +254,21 @@
 			<version>5.1.12</version>
 			<scope>test</scope>
 		</dependency>
+
+		-->
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>14.0.1</version>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
-			<version>5.11</version>
+			<version>6.8.5</version>
 			<scope>test</scope>
-			<classifier>jdk15</classifier>
 		</dependency>
 	</dependencies>
 </project>
