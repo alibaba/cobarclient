@@ -21,13 +21,13 @@ import java.util.concurrent.*;
 /**
  * Created with IntelliJ IDEA.
  */
-public class MysdalSqlmapClientTemplate extends SqlMapClientTemplate implements DisposableBean {
+public class MysdalSqlMapClientTemplate extends SqlMapClientTemplate implements DisposableBean {
     /**
-     * we need target set of the shard to set the boundary of distributed data access and negotiate some default settings for MysdalSqlmapClientTemplate, say, default pool size to use.
+     * we need target set of the shard to set the boundary of distributed data access and negotiate some default settings for MysdalSqlMapClientTemplate, say, default pool size to use.
      */
     private Set<Shard> shards;
     /**
-     * Since Routes should be assigned explicitly, A Router has to be injected explicitly too. Anyway, we are using MysdalSqlmapClientTemplate to do distributed data access, right?
+     * Since Routes should be assigned explicitly, A Router has to be injected explicitly too. Anyway, we are using MysdalSqlMapClientTemplate to do distributed data access, right?
      */
     private Router router;
     private ExecutorService executor;
