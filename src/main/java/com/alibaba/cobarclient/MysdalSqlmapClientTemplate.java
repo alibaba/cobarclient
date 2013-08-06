@@ -54,7 +54,11 @@ public class MysdalSqlMapClientTemplate extends SqlMapClientTemplate implements 
         if (router == null) throw new IllegalArgumentException("'router' argument is required");
         if (executor == null) {
             useDefaultExecutor = true;
-            executor = new ForkJoinPool(shards.size() * 10);
+            executor = Executors.newCachedThreadPool(new ThreadFactory() {
+                public Thread newThread(Runnable r) {
+                    return new Thread(r, "MysdalSqlMapClientTemplate executor thread");
+                }
+            });
         }
         for (Shard shard : shards) {
             CURRENT_THREAD_SQLMAP_CLIENT_TEMPLATES.put(shard.getId(), new SqlMapClientTemplate(shard.getDataSource(), getSqlMapClient()));
