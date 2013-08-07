@@ -21,13 +21,13 @@ import java.util.concurrent.*;
 /**
  * Created with IntelliJ IDEA.
  */
-public class MysdalSqlmapClientTemplate extends SqlMapClientTemplate implements DisposableBean {
+public class MysdalSqlMapClientTemplate extends SqlMapClientTemplate implements DisposableBean {
     /**
-     * we need target set of the shard to set the boundary of distributed data access and negotiate some default settings for MysdalSqlmapClientTemplate, say, default pool size to use.
+     * we need target set of the shard to set the boundary of distributed data access and negotiate some default settings for MysdalSqlMapClientTemplate, say, default pool size to use.
      */
     private Set<Shard> shards;
     /**
-     * Since Routes should be assigned explicitly, A Router has to be injected explicitly too. Anyway, we are using MysdalSqlmapClientTemplate to do distributed data access, right?
+     * Since Routes should be assigned explicitly, A Router has to be injected explicitly too. Anyway, we are using MysdalSqlMapClientTemplate to do distributed data access, right?
      */
     private Router router;
     private ExecutorService executor;
@@ -54,7 +54,11 @@ public class MysdalSqlmapClientTemplate extends SqlMapClientTemplate implements 
         if (router == null) throw new IllegalArgumentException("'router' argument is required");
         if (executor == null) {
             useDefaultExecutor = true;
-            executor = new ForkJoinPool(shards.size() * 10);
+            executor = Executors.newCachedThreadPool(new ThreadFactory() {
+                public Thread newThread(Runnable r) {
+                    return new Thread(r, "MysdalSqlMapClientTemplate executor thread");
+                }
+            });
         }
         for (Shard shard : shards) {
             CURRENT_THREAD_SQLMAP_CLIENT_TEMPLATES.put(shard.getId(), new SqlMapClientTemplate(shard.getDataSource(), getSqlMapClient()));
