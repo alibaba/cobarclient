@@ -18,7 +18,7 @@ public class SimpleRouterTest {
     public static DataSource dataSource1 = new SimpleDriverDataSource();
     public static DataSource dataSource2 = new SimpleDriverDataSource();
     public static Shard shard1 = new Shard("shard1", dataSource1);
-    public static Shard shard2 = new Shard("shard1", dataSource2);
+    public static Shard shard2 = new Shard("shard2", dataSource2);
     public static String SQLMAP1 = "com.alibaba.domain.Offer.insert";
     public static String SQLMAP2 = "com.alibaba.domain.Offer";
     public static String SQLMAP3 = "com.alibaba.domain.Customer.find";
