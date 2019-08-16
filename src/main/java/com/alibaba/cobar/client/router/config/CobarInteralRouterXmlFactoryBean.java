@@ -54,6 +54,10 @@ public class CobarInteralRouterXmlFactoryBean extends
         xstream.addImplicitCollection(InternalRules.class, "rules");
         xstream.useAttributeFor(InternalRule.class, "merger");
 
+        // To eliminate the warning: Security framework of XStream not initialized, XStream is probably vulnerable
+        XStream.setupDefaultSecurity(xstream);
+        xstream.allowTypes(new Class[]{InternalRule.class});
+
         InternalRules internalRules = (InternalRules) xstream.fromXML(configLocation
                 .getInputStream());
         List<InternalRule> rules = internalRules.getRules();
